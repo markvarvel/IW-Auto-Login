@@ -130,6 +130,7 @@ const tabGroupsUpdate = vi.fn(async (_groupId: number, _updateProperties: chrome
 // ---------- chrome.runtime ----------
 
 const onMessage = new MockEvent<[unknown, chrome.runtime.MessageSender, (response: unknown) => void]>();
+const runtimeSendMessage = vi.fn(async (_message: unknown): Promise<unknown> => undefined);
 
 // ---------- Assemble global chrome ----------
 
@@ -168,6 +169,7 @@ export function setupChromeMock() {
     },
     runtime: {
       onMessage,
+      sendMessage: runtimeSendMessage,
     },
   } as unknown as typeof chrome;
 
@@ -182,6 +184,7 @@ export function resetStorage() {
 // Re-export mocks for test assertions
 export const mocks = {
   storageLocal,
+  runtimeSendMessage,
   tabsQuery,
   tabsCreate,
   tabsUpdate,
