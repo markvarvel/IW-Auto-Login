@@ -16,17 +16,19 @@ import {
 import LoginTab from './components/LoginTab';
 import RefreshTab from './components/RefreshTab';
 import LogsTab from './components/LogsTab';
-import { createTheme, ThemeProvider, CssBaseline, useMediaQuery } from '@mui/material';
-import {
-  Typography,
-  Tabs,
-  Tab,
-  Box,
-  Alert,
-  Snackbar,
-  Button,
-} from '@mui/material';
-import { Refresh, Upload, Help } from '@mui/icons-material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Typography from '@mui/material/Typography';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+import Button from '@mui/material/Button';
+import Refresh from '@mui/icons-material/Refresh';
+import Upload from '@mui/icons-material/Upload';
+import Help from '@mui/icons-material/Help';
 
 /** Try to read from the active stored file handle. Returns data or null. */
 async function readStoredHandle(): Promise<LoginData[] | null> {

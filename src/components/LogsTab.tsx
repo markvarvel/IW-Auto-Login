@@ -1,4 +1,9 @@
-import { Button, Typography, Box, List, ListItem, ListItemText } from '@mui/material';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
 
 interface LogsTabProps {
   logs: string[];

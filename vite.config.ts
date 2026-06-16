@@ -45,6 +45,15 @@ export default defineConfig({
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@mui') || id.includes('@emotion')) return 'vendor-mui'
+            if (id.includes('react-dom')) return 'vendor-react'
+            if (id.includes('react') && !id.includes('react-dom')) return 'vendor-react'
+            if (id.includes('xlsx')) return 'vendor-xlsx'
+            return 'vendor'
+          }
+        },
       },
     },
     outDir: 'dist',

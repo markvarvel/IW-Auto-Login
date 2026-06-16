@@ -1,5 +1,20 @@
-import { Button, Typography, Box, TextField, Alert, Divider, FormControl, InputLabel, Select, MenuItem, IconButton, Stack } from '@mui/material';
-import { RestartAlt, FolderOpen, Upload, Delete, History } from '@mui/icons-material';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
+import Divider from '@mui/material/Divider';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import IconButton from '@mui/material/IconButton';
+import Stack from '@mui/material/Stack';
+import RestartAlt from '@mui/icons-material/RestartAlt';
+import FolderOpen from '@mui/icons-material/FolderOpen';
+import Upload from '@mui/icons-material/Upload';
+import Delete from '@mui/icons-material/Delete';
+import History from '@mui/icons-material/History';
 import { LoginData, ProgressState, getTimestampColor, isRecentlyLoaded, type RecentFile, type SchemaValidation } from '../utils';
 
 interface LoginTabProps {

@@ -1,4 +1,8 @@
-import { Button, Typography, Box, TextField, Alert } from '@mui/material';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
 import { ProgressState } from '../utils';
 
 interface RefreshTabProps {
