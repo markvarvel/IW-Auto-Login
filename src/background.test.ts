@@ -308,8 +308,9 @@ describe('background.ts — login flow', () => {
         login,
       });
 
+      // Wait for waitForTabLoad to register its onUpdated listener
+      await mocks.onUpdated.waitForListener();
       // Trigger onUpdated with status 'complete' to resolve waitForTabLoad
-      await vi.advanceTimersByTimeAsync(100);
       await fireTabUpdated(500, { status: 'complete' });
 
       // Advance past the 22s delay in loginFormSubmitted
@@ -468,7 +469,7 @@ describe('background.ts — login flow', () => {
         login,
       });
 
-      await vi.advanceTimersByTimeAsync(100);
+      await mocks.onUpdated.waitForListener();
       await fireTabUpdated(800, { status: 'complete' });
       await vi.advanceTimersByTimeAsync(23000);
       await formSubmittedPromise;
@@ -517,7 +518,7 @@ describe('background.ts — login flow', () => {
         login,
       });
 
-      await vi.advanceTimersByTimeAsync(100);
+      await mocks.onUpdated.waitForListener();
       await fireTabUpdated(900, { status: 'complete' });
       await vi.advanceTimersByTimeAsync(23000);
       await formSubmittedPromise;
@@ -566,7 +567,7 @@ describe('background.ts — login flow', () => {
         login,
       });
 
-      await vi.advanceTimersByTimeAsync(100);
+      await mocks.onUpdated.waitForListener();
       await fireTabUpdated(950, { status: 'complete' });
       await vi.advanceTimersByTimeAsync(23000);
       await formSubmittedPromise;
@@ -575,6 +576,128 @@ describe('background.ts — login flow', () => {
         title: 'IW Accounts',  // default
         color: 'blue',         // normalizeTabColor('') falls back to blue
         collapsed: false,
+      });
+    });
+
+    it('handles grouping errors gracefully', async () => {
+      const login = makeLogin({ Tab: 'FailGroup', Color: 'red' });
+
+      mocks.tabsCreate.mockResolvedValueOnce({
+        id: 960,
+        windowId: 1,
+        url: '',
+        active: true,
+        index: 0,
+        highlighted: false,
+        pinned: false,
+        status: 'loading',
+      });
+
+      await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
+      await vi.advanceTimersByTimeAsync(4000);
+
+      mocks.tabsGet.mockResolvedValue({
+        id: 960,
+        windowId: 1,
+        url: 'https://www.instantwar.com',
+        active: true,
+        index: 0,
+        highlighted: false,
+        pinned: false,
+        status: 'complete',
+      });
+      // Make tabGroups.query throw to simulate grouping failure
+      mocks.tabGroupsQuery.mockRejectedValueOnce(new Error('Tab grouping not supported'));
+
+      const formSubmittedPromise = sendMessage({
+        action: 'loginFormSubmitted',
+        login,
+      });
+
+      await mocks.onUpdated.waitForListener();
+      await fireTabUpdated(960, { status: 'complete' });
+      await vi.advanceTimersByTimeAsync(23000);
+      await formSubmittedPromise;
+
+      // groupTabByLogin catches errors internally, so the log says "groupTabByLogin FAILED"
+      // (not "Grouping failed" which is in the outer try/catch that never fires)
+      const setCalls = mocks.storageLocal.set.mock.calls;
+      const allData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
+      const errorLog = allData.find((s: string) => s.includes('groupTabByLogin FAILED'));
+      expect(errorLog).toBeDefined();
+    });
+  });
+
+  // ===== sequential queue processing =====
+
+  describe('sequential queue processing', () => {
+    it('processes multiple logins in sequence', async () => {
+      const login1 = makeLogin({ 'User Name': 'first', Tab: 'G1', Color: 'red' });
+      const login2 = makeLogin({ 'User Name': 'second', Tab: 'G2', Color: 'blue' });
+
+      mocks.tabsCreate
+        .mockResolvedValueOnce({
+          id: 1100,
+          windowId: 1,
+          url: '',
+          active: true,
+          index: 0,
+          highlighted: false,
+          pinned: false,
+          status: 'loading',
+        })
+        .mockResolvedValueOnce({
+          id: 1200,
+          windowId: 1,
+          url: '',
+          active: true,
+          index: 0,
+          highlighted: false,
+          pinned: false,
+          status: 'loading',
+        });
+
+      await sendMessage({
+        action: 'startAutomatedLogin',
+        loginCredentials: [login1, login2],
+      });
+
+      // Advance past the first 3s delay — first login starts
+      await vi.advanceTimersByTimeAsync(4000);
+      expect(mocks.tabsCreate).toHaveBeenCalledTimes(1);
+
+      // Simulate loginFormSubmitted for the first login to trigger the next one
+      mocks.tabsGet.mockResolvedValue({
+        id: 1100,
+        windowId: 1,
+        url: 'https://www.instantwar.com',
+        active: true,
+        index: 0,
+        highlighted: false,
+        pinned: false,
+        status: 'complete',
+      });
+      mocks.tabGroupsQuery.mockResolvedValue([]);
+
+      const formPromise1 = sendMessage({
+        action: 'loginFormSubmitted',
+        login: login1,
+      });
+
+      await mocks.onUpdated.waitForListener();
+      await fireTabUpdated(1100, { status: 'complete' });
+      await vi.advanceTimersByTimeAsync(23000);
+      await formPromise1;
+
+      // After loginFormSubmitted completes, processLoginQueue should fire again
+      // Advance past the next 3s delay for the second login
+      await vi.advanceTimersByTimeAsync(4000);
+
+      // Second tab should now be created
+      expect(mocks.tabsCreate).toHaveBeenCalledTimes(2);
+      expect(mocks.tabsCreate).toHaveBeenLastCalledWith({
+        url: 'https://www.instantwar.com',
+        active: true,
       });
     });
   });

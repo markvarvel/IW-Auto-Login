@@ -25,9 +25,30 @@ class MockEvent<T extends unknown[]> {
     return this.listeners.includes(fn);
   }
 
+  /** Number of currently registered listeners */
+  get listenerCount() {
+    return this.listeners.length;
+  }
+
+  /**
+   * Wait until at least one listener is registered.
+   * Uses a synchronous polling loop with vi.advanceTimersByTimeAsync
+   * to tick fake timers when needed.
+   */
+  async waitForListener(timeoutMs = 500): Promise<void> {
+    if (this.listeners.length > 0) return;
+    const start = Date.now();
+    while (this.listeners.length === 0) {
+      if (Date.now() - start > timeoutMs) {
+        throw new Error('Timeout waiting for listener');
+      }
+      await vi.advanceTimersByTimeAsync(10);
+    }
+  }
+
   /** Call all registered listeners — test helper */
   async fire(...args: T) {
-    for (const fn of this.listeners) {
+    for (const fn of [...this.listeners]) {
       await fn(...args);
     }
   }
