@@ -2,7 +2,7 @@
 // Combines login, refresh, and tab management
 
 import { LoginData } from './utils';
-import { filterByRange } from './login-utils';
+import { filterByRange, normalizeTabColor, loginDisplayName, formatLogEntry } from './login-utils';
 
 let loginInProcess = false;
 let loginQueue: LoginData[] = [];
@@ -13,8 +13,7 @@ let currentLoginIndex = 0;
 let shouldStopRefresh = false;
 
 const logToStorage = async (message: string, type: 'info' | 'error' | 'warn' = 'info') => {
-  const timestamp = new Date().toLocaleString();
-  const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+  const logEntry = formatLogEntry(message, type);
   console.log(logEntry);
   const result = await chrome.storage.local.get(['extensionLogs']);
   const currentLogs = result.extensionLogs || [];
@@ -73,7 +72,7 @@ async function processLoginQueue() {
   }
 
   try {
-    logToStorage(`Logging in as: ${currentLogin["User Name"]}`);
+    logToStorage(`Logging in as: ${loginDisplayName(currentLogin)}`);
 
     // Clear cookies for fresh login
     const cookies = await chrome.cookies.getAll({ domain: ".instantwar.com" });
@@ -95,7 +94,7 @@ async function processLoginQueue() {
       });
     }
   } catch (error) {
-    logToStorage(`Error processing login for ${currentLogin["User Name"]}: ${error}`, 'error');
+    logToStorage(`Error processing login for ${loginDisplayName(currentLogin)}: ${error}`, 'error');
     loginInProcess = false;
     processLoginQueue();
   }
@@ -123,8 +122,8 @@ async function updateRefreshProgress(current: number, total: number, active: boo
 
 async function groupTabByLogin(tabId: number, login: LoginData) {
   const groupName = login["Tab"] || "IW Accounts";
-  const groupColor = ((login["Color"] || "blue").trim().toLowerCase() as chrome.tabGroups.ColorEnum);
-  const userName = login["User Name"] || 'unknown';
+  const groupColor = normalizeTabColor(login["Color"]) as chrome.tabGroups.ColorEnum;
+  const userName = loginDisplayName(login);
 
   logToStorage(`groupTabByLogin: tabId=${tabId}, group="${groupName}", color="${groupColor}", user=${userName}`);
 
@@ -240,7 +239,7 @@ chrome.runtime.onMessage.addListener(async (message, _sender) => {
   }
   
   else if (message.action === 'loginFormSubmitted') {
-    const loginName = message.login["User Name"] || 'unknown';
+    const loginName = loginDisplayName(message.login);
     // Use the tab ID we tracked from processLoginQueue — NOT _sender.tab?.id
     // because the content script may have been re-injected and the sender ID is stale
     const tabId = currentLoginTabId;
