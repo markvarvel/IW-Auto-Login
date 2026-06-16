@@ -1,7 +1,7 @@
-# InstantWar-Auto-Login
+# IW-Auto-Login
 
-[![Latest Release](https://img.shields.io/github/v/release/markvarvel/InstantWar-Auto-Login?label=Latest%20Release)](https://github.com/markvarvel/InstantWar-Auto-Login/releases/latest)
-[![Download](https://img.shields.io/badge/Download-iw--auto--login--dist.zip-blue?style=for-the-badge)](https://github.com/markvarvel/InstantWar-Auto-Login/releases/latest/download/iw-auto-login-dist.zip)
+[![Latest Release](https://img.shields.io/github/v/release/markvarvel/IW-Auto-Login?label=Latest%20Release)](https://github.com/markvarvel/IW-Auto-Login/releases/latest)
+[![Download](https://img.shields.io/badge/Download-iw--auto--login--dist.zip-blue?style=for-the-badge)](https://github.com/markvarvel/IW-Auto-Login/releases/latest/download/iw-auto-login-dist.zip)
 
 Chrome extension (Manifest V3) for automated login, refresh, and tab management for InstantWar. Works on Windows, macOS, and Linux. Also compatible with Brave Browser.
 
@@ -15,11 +15,11 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
-1. **Download** the latest [iw-auto-login-dist.zip](https://github.com/markvarvel/InstantWar-Auto-Login/releases/latest/download/iw-auto-login-dist.zip) from GitHub Releases
+1. **Download** the latest [iw-auto-login-dist.zip](https://github.com/markvarvel/IW-Auto-Login/releases/latest/download/iw-auto-login-dist.zip) from GitHub Releases
 2. **Extract** the zip file to a permanent folder
-   - **Windows:** `C:\Extensions\InstantWar-Auto-Login\`
-   - **macOS:** `~/Extensions/InstantWar-Auto-Login/`
-   - **Linux:** `~/Extensions/InstantWar-Auto-Login/`
+   - **Windows:** `C:\Extensions\IW-Auto-Login\`
+   - **macOS:** `~/Extensions/IW-Auto-Login/`
+   - **Linux:** `~/Extensions/IW-Auto-Login/`
 3. Open `chrome://extensions/` in Chrome (or `brave://extensions/` in Brave Browser)
 4. Enable **Developer mode** (toggle in top right)
 5. Click **Load unpacked**
@@ -29,8 +29,8 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 ```bash
 # Clone the repository
-git clone https://github.com/markvarvel/InstantWar-Auto-Login.git
-cd InstantWar-Auto-Login
+git clone https://github.com/markvarvel/IW-Auto-Login.git
+cd IW-Auto-Login
 
 # Install dependencies
 npm install
@@ -138,20 +138,7 @@ At minimum, you only need to fill in `User Name` and `Password` per account.
 
 ## Changelog
 
-| Version | Date | Changes |
-|---------|------|---------|
-| [v1.0.16](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.16) | 2026-06-14 | Remove dead auto-click code from background.ts, content.ts, and utils.ts |
-| [v1.0.15](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.15) | 2026-06-14 | Update release workflow to auto-generate release notes from commit messages |
-| [v1.0.14](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.14) | 2026-06-14 | Cross-platform compatibility — Mac/Linux path examples, update-version.js symlink, manifest cleanup |
-| [v1.0.13](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.13) | 2026-06-14 | Add changelog section to README documenting all releases |
-| [v1.0.12](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.12) | 2026-06-14 | Remove Auto-Click Automation section from README |
-| [v1.0.11](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.11) | 2026-06-14 | Remove duplicate `InstantWar-Auto-Login/` subdirectory |
-| [v1.0.10](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.10) | 2026-06-14 | Make Player Name, Email, Old Pass, Tab, Position optional; update xlsx template to only require User Name and Password; add Optional Field Defaults docs |
-| [v1.0.5](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.5) | 2026-06-14 | Fix `update-version.js` to keep source manifest in sync; rename release zip to `iw-auto-login-dist.zip`; add GitHub Actions release workflow |
-| [v1.0.4](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.4) | 2026-06-14 | Brave Browser compatibility; README docs for File System Access API behavior |
-| [v1.0.3](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.3) | 2026-06-14 | Fix `showOpenFilePicker` fallback for Chrome extension popups; consolidate file handlers |
-| [v1.0.2](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.2) | 2026-06-13 | Rename to InstantWar-Auto-Login; remove legacy helpers; update README with badges |
-| [v1.0.1](https://github.com/markvarvel/InstantWar-Auto-Login/releases/tag/v1.0.1) | 2026-06-13 | Initial release — dynamic xlsx loading, Recent Files dropdown, schema validation, CI workflow |
+See [Releases](https://github.com/markvarvel/IW-Auto-Login/releases) for full changelog.
 
 ## Prerequisites
 
@@ -168,8 +155,8 @@ You need these installed on your computer before you can build or modify the ext
 Open a terminal (Command Prompt or PowerShell on Windows, Terminal on Mac/Linux) and run:
 
 ```bash
-git clone https://github.com/markvarvel/InstantWar-Auto-Login.git
-cd InstantWar-Auto-Login
+git clone https://github.com/markvarvel/IW-Auto-Login.git
+cd IW-Auto-Login
 ```
 
 ### Step 2: Install the tools
