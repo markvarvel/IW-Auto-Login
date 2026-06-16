@@ -2,6 +2,7 @@
 // Combines login, refresh, and tab management
 
 import { LoginData } from './utils';
+import { filterByRange } from './login-utils';
 
 let loginInProcess = false;
 let loginQueue: LoginData[] = [];
@@ -22,31 +23,6 @@ const logToStorage = async (message: string, type: 'info' | 'error' | 'warn' = '
 };
 
 // ==================== SHARED HELPERS ====================
-
-// Parse range filter string into a set of 0-based indices
-function parseRangeFilter(rangeFilter: string): Set<number> {
-  const ranges = rangeFilter.split(',').map(r => r.trim());
-  const selectedIndices = new Set<number>();
-  for (const range of ranges) {
-    if (range.includes('-')) {
-      const [start, end] = range.split('-').map(n => parseInt(n.trim(), 10));
-      if (!isNaN(start) && !isNaN(end)) {
-        for (let i = start; i <= end; i++) selectedIndices.add(i - 1);
-      }
-    } else {
-      const index = parseInt(range, 10);
-      if (!isNaN(index)) selectedIndices.add(index - 1);
-    }
-  }
-  return selectedIndices;
-}
-
-// Filter array by range string
-function filterByRange<T>(items: T[], rangeFilter: string | undefined): T[] {
-  if (!rangeFilter || rangeFilter.trim() === '') return items;
-  const indices = parseRangeFilter(rangeFilter);
-  return items.filter((_, index) => indices.has(index));
-}
 
 // Helper function to wait for tab load
 async function waitForTabLoad(tabId: number, timeout: number = 30000): Promise<void> {
