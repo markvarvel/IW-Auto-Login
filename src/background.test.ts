@@ -39,6 +39,21 @@ async function fireTabUpdated(
   );
 }
 
+/**
+ * Complete a single tab refresh cycle: advance so refreshAllTabs reaches
+ * waitForTabLoad, fire onUpdated to resolve it, flush microtasks, then
+ * advance past the 27s inter-tab delay.
+ */
+async function completeTabRefresh(tabId: number) {
+  // Let refreshAllTabs progress through its async operations to waitForTabLoad
+  await vi.advanceTimersByTimeAsync(50);
+  await fireTabUpdated(tabId, { status: 'complete' });
+  // Flush microtasks so refreshAllTabs creates the 27s setTimeout
+  await vi.advanceTimersByTimeAsync(0);
+  // Now advance past the 27s delay
+  await vi.advanceTimersByTimeAsync(28000);
+}
+
 // ---------- tests ----------
 
 describe('background.ts — login flow', () => {
@@ -619,6 +634,183 @@ describe('background.ts — login flow', () => {
       const allData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
       const errorLog = allData.find((s: string) => s.includes('groupTabByLogin FAILED'));
       expect(errorLog).toBeDefined();
+    });
+  });
+
+  // ===== startRefresh =====
+
+  describe('startRefresh', () => {
+    it('refreshes instantwar.com tabs', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 10, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+        { id: 11, url: 'https://www.instantwar.com/alliance', windowId: 1 } as chrome.tabs.Tab,
+        { id: 12, url: 'https://google.com', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh' });
+
+      await completeTabRefresh(10);
+      await completeTabRefresh(11);
+      await refreshPromise;
+
+      // Should have queried all tabs
+      expect(mocks.tabsQuery).toHaveBeenCalled();
+
+      // Should have updated and reloaded only the 2 instantwar tabs (not google.com)
+      expect(mocks.tabsUpdate).toHaveBeenCalledTimes(2);
+      expect(mocks.tabsReload).toHaveBeenCalledTimes(2);
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(10, { active: true });
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(11, { active: true });
+      expect(mocks.tabsReload).toHaveBeenCalledWith(10);
+      expect(mocks.tabsReload).toHaveBeenCalledWith(11);
+    });
+
+    it('filters by rangeFilter when provided', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 20, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+        { id: 21, url: 'https://www.instantwar.com/alliance', windowId: 1 } as chrome.tabs.Tab,
+        { id: 22, url: 'https://www.instantwar.com/map', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh', rangeFilter: '1,3' });
+
+      await completeTabRefresh(20);
+      await completeTabRefresh(22);
+      await refreshPromise;
+
+      // Only tabs at index 0 and 2 should be refreshed (1-based: 1,3)
+      expect(mocks.tabsUpdate).toHaveBeenCalledTimes(2);
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(20, { active: true });
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(22, { active: true });
+      // Tab 21 (index 1) should NOT be refreshed
+      expect(mocks.tabsUpdate).not.toHaveBeenCalledWith(21, { active: true });
+    });
+
+    it('does nothing when no instantwar tabs exist', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 30, url: 'https://google.com', windowId: 1 } as chrome.tabs.Tab,
+        { id: 31, url: 'https://github.com', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      await sendMessage({ action: 'startRefresh' });
+
+      // No tabs should be refreshed
+      expect(mocks.tabsUpdate).not.toHaveBeenCalled();
+      expect(mocks.tabsReload).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when tabs query returns empty', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([]);
+
+      await sendMessage({ action: 'startRefresh' });
+
+      expect(mocks.tabsUpdate).not.toHaveBeenCalled();
+      expect(mocks.tabsReload).not.toHaveBeenCalled();
+    });
+
+    it('handles waitForTabLoad timeout gracefully and continues', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 40, url: 'https://www.instantwar.com/slow', windowId: 1 } as chrome.tabs.Tab,
+        { id: 41, url: 'https://www.instantwar.com/fast', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh' });
+
+      // Wait for the first tab's waitForTabLoad to register
+      await mocks.onUpdated.waitForListener();
+      // Don't fire onUpdated — let it timeout (30s default)
+      await vi.advanceTimersByTimeAsync(31000);
+
+      // Should have logged a timeout warning
+      const setCalls = mocks.storageLocal.set.mock.calls;
+      const allData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
+      const timeoutLog = allData.find((s: string) => s.includes('Timeout refreshing tab 40'));
+      expect(timeoutLog).toBeDefined();
+
+      // Advance past the 27s inter-tab delay
+      await vi.advanceTimersByTimeAsync(28000);
+
+      // Second tab should still be processed
+      await completeTabRefresh(41);
+      await refreshPromise;
+
+      // Both tabs should have been updated/reloaded
+      expect(mocks.tabsUpdate).toHaveBeenCalledTimes(2);
+      expect(mocks.tabsReload).toHaveBeenCalledTimes(2);
+    });
+
+    it('clears refreshProgress when complete', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 50, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh' });
+
+      await completeTabRefresh(50);
+      await refreshPromise;
+
+      // refreshProgress should have been set to (0, 0, false) at the end
+      const setCalls = mocks.storageLocal.set.mock.calls;
+      const progressCalls = setCalls.filter((c: Record<string, unknown>[]) => {
+        return c[0] && typeof c[0] === 'object' && 'refreshProgress' in (c[0] as Record<string, unknown>);
+      });
+      expect(progressCalls.length).toBeGreaterThan(0);
+      const lastProgressCall = progressCalls[progressCalls.length - 1];
+      expect(lastProgressCall[0].refreshProgress).toEqual({ current: 0, total: 0, active: false });
+    });
+  });
+
+  // ===== stopRefresh =====
+
+  describe('stopRefresh', () => {
+    it('stops the refresh cycle after first tab completes', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: 60, url: 'https://www.instantwar.com/game1', windowId: 1 } as chrome.tabs.Tab,
+        { id: 61, url: 'https://www.instantwar.com/game2', windowId: 1 } as chrome.tabs.Tab,
+        { id: 62, url: 'https://www.instantwar.com/game3', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh' });
+
+      // Let refreshAllTabs reach waitForTabLoad for the first tab
+      await vi.advanceTimersByTimeAsync(50);
+
+      // Stop the refresh BEFORE completing the first tab
+      await sendMessage({ action: 'stopRefresh' });
+
+      // Complete the first tab's refresh
+      await fireTabUpdated(60, { status: 'complete' });
+      await vi.advanceTimersByTimeAsync(0);  // flush microtask
+      await vi.advanceTimersByTimeAsync(28000);  // advance past 27s
+      await refreshPromise;
+
+      // First tab should be refreshed, but not the others
+      expect(mocks.tabsUpdate).toHaveBeenCalledTimes(1);
+      expect(mocks.tabsReload).toHaveBeenCalledTimes(1);
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(60, { active: true });
+
+      // Should have logged stop message
+      const setCalls = mocks.storageLocal.set.mock.calls;
+      const allData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
+      const stopLog = allData.find((s: string) => s.includes('Refresh stopped by user'));
+      expect(stopLog).toBeDefined();
+    });
+
+    it('skips tabs without an id', async () => {
+      mocks.tabsQuery.mockResolvedValueOnce([
+        { id: undefined, url: 'https://www.instantwar.com/noid', windowId: 1 } as unknown as chrome.tabs.Tab,
+        { id: 70, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+      ]);
+
+      const refreshPromise = sendMessage({ action: 'startRefresh' });
+
+      await completeTabRefresh(70);
+      await refreshPromise;
+
+      // Only the tab with an id should be refreshed
+      expect(mocks.tabsUpdate).toHaveBeenCalledTimes(1);
+      expect(mocks.tabsReload).toHaveBeenCalledTimes(1);
+      expect(mocks.tabsUpdate).toHaveBeenCalledWith(70, { active: true });
     });
   });
 
