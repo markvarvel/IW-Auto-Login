@@ -32,17 +32,19 @@ describe('content.ts', () => {
     originalLocation = Object.getOwnPropertyDescriptor(window, 'location');
 
     // Reset the re-injection guard
-    delete (window as Record<string, unknown>).contentScriptInjected;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).contentScriptInjected;
 
     // Mock document.querySelector
-    querySelectorMock = vi.fn(() => null);
-    vi.spyOn(document, 'querySelector').mockImplementation(querySelectorMock);
+    querySelectorMock = vi.fn((): Element | null => null);
+    vi.spyOn(document, 'querySelector').mockImplementation(querySelectorMock as (selector: string) => Element | null);
   });
 
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    delete (window as Record<string, unknown>).contentScriptInjected;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).contentScriptInjected;
 
     // Restore original window.location if it was overridden by Object.defineProperty
     if (originalLocation) {
@@ -55,12 +57,14 @@ describe('content.ts', () => {
   describe('re-injection guard', () => {
     it('sets contentScriptInjected on first import', async () => {
       await import('./content');
-      expect((window as Record<string, unknown>).contentScriptInjected).toBe(true);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((window as any).contentScriptInjected).toBe(true);
     });
 
     it('logs warning on second import', async () => {
       // First import
-      (window as Record<string, unknown>).contentScriptInjected = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (window as any).contentScriptInjected = true;
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       await import('./content');

@@ -103,10 +103,10 @@ export async function removeRecentFile(name: string): Promise<void> {
 export async function readFromHandle(handle: FileSystemFileHandle): Promise<LoginData[] | null> {
   try {
     // Try reading directly first — permission may already be granted from a previous session
-    let permission = await handle.queryPermission({ mode: 'read' } as PermissionOptions);
+    let permission = await handle.queryPermission({ mode: 'read' });
     if (permission !== 'granted') {
       // Only request permission if not already granted (avoids prompt outside user gesture)
-      permission = await handle.requestPermission({ mode: 'read' } as PermissionOptions);
+      permission = await handle.requestPermission({ mode: 'read' });
     }
     if (permission !== 'granted') return null;
     const file = await handle.getFile();

@@ -10,6 +10,27 @@ import { setupChromeMock, mocks } from './__mocks__/chrome';
 
 // ---------- helpers ----------
 
+/** Create a complete chrome.tabs.Tab mock object with all required properties */
+function makeTab(overrides: Partial<chrome.tabs.Tab> = {}): chrome.tabs.Tab {
+  return {
+    id: 1,
+    windowId: 1,
+    url: '',
+    active: true,
+    index: 0,
+    highlighted: false,
+    pinned: false,
+    incognito: false,
+    frozen: false,
+    selected: false,
+    discarded: false,
+    autoDiscardable: true,
+    groupId: -1,
+    status: 'complete',
+    ...overrides,
+  };
+}
+
 function makeLogin(overrides: Record<string, string> = {}) {
   return {
     'User Name': 'testuser',
@@ -35,7 +56,7 @@ async function fireTabUpdated(
   await mocks.onUpdated.fire(
     tabId,
     changeInfo as chrome.tabs.TabChangeInfo,
-    { id: tabId, url, windowId: 1 } as chrome.tabs.Tab,
+    makeTab({ id: tabId, url, windowId: 1 }),
   );
 }
 
@@ -78,17 +99,7 @@ describe('background.ts — login flow', () => {
     it('queues logins and logs the count', async () => {
       const login = makeLogin();
 
-      // Mock tabs.create to return a tab
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 101,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 101, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
 
@@ -110,16 +121,7 @@ describe('background.ts — login flow', () => {
         makeLogin({ 'User Name': 'user3' }),
       ];
 
-      mocks.tabsCreate.mockResolvedValue({
-        id: 101,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValue(makeTab({ id: 101, status: 'loading' }));
 
       // rangeFilter '1,3' should only queue user1 and user3 (1-based)
       await sendMessage({
@@ -156,16 +158,7 @@ describe('background.ts — login flow', () => {
     it('clears the login queue and stops processing', async () => {
       const login = makeLogin();
 
-      mocks.tabsCreate.mockResolvedValue({
-        id: 101,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValue(makeTab({ id: 101, status: 'loading' }));
 
       // Start a login
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
@@ -187,16 +180,7 @@ describe('background.ts — login flow', () => {
     it('clears cookies, creates a tab, injects content script, and sends message', async () => {
       const login = makeLogin({ 'User Name': 'alice', Tab: 'GroupA', Color: 'red' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 200,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 200, status: 'loading' }));
       mocks.cookiesGetAll.mockResolvedValueOnce([
         { domain: '.instantwar.com', path: '/', name: 'session' } as chrome.cookies.Cookie,
       ]);
@@ -235,16 +219,7 @@ describe('background.ts — login flow', () => {
     it('logs in as the correct user (loginDisplayName)', async () => {
       const login = makeLogin({ 'User Name': 'bob', 'Player Name': 'BobTheBuilder' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 300,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 300, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
@@ -282,32 +257,14 @@ describe('background.ts — login flow', () => {
       const login = makeLogin({ Tab: 'MyAlliance', Color: 'purple' });
 
       // First, start a login to set currentLoginTabId
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 500,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 500, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
       // Now simulate the game page loading on the tab (for waitForTabLoad)
       // and then fire loginFormSubmitted
-      mocks.tabsGet.mockResolvedValueOnce({
-        id: 500,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValueOnce(makeTab({ id: 500, status: 'complete' }));
       mocks.tabGroupsQuery.mockResolvedValueOnce([]);
 
       // Fire loginFormSubmitted — this will call waitForTabLoad which
@@ -387,16 +344,7 @@ describe('background.ts — login flow', () => {
       const login = makeLogin();
 
       // Start a login so currentLogin is set
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 600,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 600, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
@@ -414,16 +362,7 @@ describe('background.ts — login flow', () => {
     it('does not inject on non-auth pages', async () => {
       const login = makeLogin();
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 700,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 700, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
@@ -444,31 +383,13 @@ describe('background.ts — login flow', () => {
     it('adds tab to existing group with same name', async () => {
       const login = makeLogin({ Tab: 'Alliance', Color: 'blue' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 800,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 800, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
       // Mock existing group with same name
-      mocks.tabsGet.mockResolvedValue({
-        id: 800,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValue(makeTab({ id: 800, status: 'complete' }));
       mocks.tabGroupsQuery.mockResolvedValueOnce([
         { id: 42, title: 'Alliance', color: 'blue', windowId: 1 } as chrome.tabGroups.TabGroup,
       ]);
@@ -495,30 +416,12 @@ describe('background.ts — login flow', () => {
     it('creates a new group when none exists', async () => {
       const login = makeLogin({ Tab: 'NewGroup', Color: 'red' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 900,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 900, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
-      mocks.tabsGet.mockResolvedValue({
-        id: 900,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValue(makeTab({ id: 900, status: 'complete' }));
       mocks.tabGroupsQuery.mockResolvedValueOnce([]);
       mocks.tabsGroup.mockResolvedValueOnce(99); // new group ID
 
@@ -544,30 +447,12 @@ describe('background.ts — login flow', () => {
     it('uses default tab name and color when not specified', async () => {
       const login = makeLogin({ Tab: '', Color: '' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 950,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 950, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
-      mocks.tabsGet.mockResolvedValue({
-        id: 950,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValue(makeTab({ id: 950, status: 'complete' }));
       mocks.tabGroupsQuery.mockResolvedValueOnce([]);
       mocks.tabsGroup.mockResolvedValueOnce(100);
 
@@ -591,30 +476,12 @@ describe('background.ts — login flow', () => {
     it('handles grouping errors gracefully', async () => {
       const login = makeLogin({ Tab: 'FailGroup', Color: 'red' });
 
-      mocks.tabsCreate.mockResolvedValueOnce({
-        id: 960,
-        windowId: 1,
-        url: '',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'loading',
-      });
+      mocks.tabsCreate.mockResolvedValueOnce(makeTab({ id: 960, status: 'loading' }));
 
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
-      mocks.tabsGet.mockResolvedValue({
-        id: 960,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValue(makeTab({ id: 960, status: 'complete' }));
       // Make tabGroups.query throw to simulate grouping failure
       mocks.tabGroupsQuery.mockRejectedValueOnce(new Error('Tab grouping not supported'));
 
@@ -629,7 +496,6 @@ describe('background.ts — login flow', () => {
       await formSubmittedPromise;
 
       // groupTabByLogin catches errors internally, so the log says "groupTabByLogin FAILED"
-      // (not "Grouping failed" which is in the outer try/catch that never fires)
       const setCalls = mocks.storageLocal.set.mock.calls;
       const allData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
       const errorLog = allData.find((s: string) => s.includes('groupTabByLogin FAILED'));
@@ -642,9 +508,9 @@ describe('background.ts — login flow', () => {
   describe('startRefresh', () => {
     it('refreshes instantwar.com tabs', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 10, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
-        { id: 11, url: 'https://www.instantwar.com/alliance', windowId: 1 } as chrome.tabs.Tab,
-        { id: 12, url: 'https://google.com', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 10, url: 'https://www.instantwar.com/game' }),
+        makeTab({ id: 11, url: 'https://www.instantwar.com/alliance' }),
+        makeTab({ id: 12, url: 'https://google.com' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh' });
@@ -667,9 +533,9 @@ describe('background.ts — login flow', () => {
 
     it('filters by rangeFilter when provided', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 20, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
-        { id: 21, url: 'https://www.instantwar.com/alliance', windowId: 1 } as chrome.tabs.Tab,
-        { id: 22, url: 'https://www.instantwar.com/map', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 20, url: 'https://www.instantwar.com/game' }),
+        makeTab({ id: 21, url: 'https://www.instantwar.com/alliance' }),
+        makeTab({ id: 22, url: 'https://www.instantwar.com/map' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh', rangeFilter: '1,3' });
@@ -688,8 +554,8 @@ describe('background.ts — login flow', () => {
 
     it('does nothing when no instantwar tabs exist', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 30, url: 'https://google.com', windowId: 1 } as chrome.tabs.Tab,
-        { id: 31, url: 'https://github.com', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 30, url: 'https://google.com' }),
+        makeTab({ id: 31, url: 'https://github.com' }),
       ]);
 
       await sendMessage({ action: 'startRefresh' });
@@ -710,8 +576,8 @@ describe('background.ts — login flow', () => {
 
     it('handles waitForTabLoad timeout gracefully and continues', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 40, url: 'https://www.instantwar.com/slow', windowId: 1 } as chrome.tabs.Tab,
-        { id: 41, url: 'https://www.instantwar.com/fast', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 40, url: 'https://www.instantwar.com/slow' }),
+        makeTab({ id: 41, url: 'https://www.instantwar.com/fast' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh' });
@@ -741,7 +607,7 @@ describe('background.ts — login flow', () => {
 
     it('clears refreshProgress when complete', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 50, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 50, url: 'https://www.instantwar.com/game' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh' });
@@ -765,9 +631,9 @@ describe('background.ts — login flow', () => {
   describe('stopRefresh', () => {
     it('stops the refresh cycle after first tab completes', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: 60, url: 'https://www.instantwar.com/game1', windowId: 1 } as chrome.tabs.Tab,
-        { id: 61, url: 'https://www.instantwar.com/game2', windowId: 1 } as chrome.tabs.Tab,
-        { id: 62, url: 'https://www.instantwar.com/game3', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: 60, url: 'https://www.instantwar.com/game1' }),
+        makeTab({ id: 61, url: 'https://www.instantwar.com/game2' }),
+        makeTab({ id: 62, url: 'https://www.instantwar.com/game3' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh' });
@@ -798,8 +664,8 @@ describe('background.ts — login flow', () => {
 
     it('skips tabs without an id', async () => {
       mocks.tabsQuery.mockResolvedValueOnce([
-        { id: undefined, url: 'https://www.instantwar.com/noid', windowId: 1 } as unknown as chrome.tabs.Tab,
-        { id: 70, url: 'https://www.instantwar.com/game', windowId: 1 } as chrome.tabs.Tab,
+        makeTab({ id: undefined, url: 'https://www.instantwar.com/noid' }) as unknown as chrome.tabs.Tab,
+        makeTab({ id: 70, url: 'https://www.instantwar.com/game' }),
       ]);
 
       const refreshPromise = sendMessage({ action: 'startRefresh' });
@@ -822,26 +688,8 @@ describe('background.ts — login flow', () => {
       const login2 = makeLogin({ 'User Name': 'second', Tab: 'G2', Color: 'blue' });
 
       mocks.tabsCreate
-        .mockResolvedValueOnce({
-          id: 1100,
-          windowId: 1,
-          url: '',
-          active: true,
-          index: 0,
-          highlighted: false,
-          pinned: false,
-          status: 'loading',
-        })
-        .mockResolvedValueOnce({
-          id: 1200,
-          windowId: 1,
-          url: '',
-          active: true,
-          index: 0,
-          highlighted: false,
-          pinned: false,
-          status: 'loading',
-        });
+        .mockResolvedValueOnce(makeTab({ id: 1100, status: 'loading' }))
+        .mockResolvedValueOnce(makeTab({ id: 1200, status: 'loading' }));
 
       await sendMessage({
         action: 'startAutomatedLogin',
@@ -853,16 +701,7 @@ describe('background.ts — login flow', () => {
       expect(mocks.tabsCreate).toHaveBeenCalledTimes(1);
 
       // Simulate loginFormSubmitted for the first login to trigger the next one
-      mocks.tabsGet.mockResolvedValue({
-        id: 1100,
-        windowId: 1,
-        url: 'https://www.instantwar.com',
-        active: true,
-        index: 0,
-        highlighted: false,
-        pinned: false,
-        status: 'complete',
-      });
+      mocks.tabsGet.mockResolvedValue(makeTab({ id: 1100, status: 'complete' }));
       mocks.tabGroupsQuery.mockResolvedValue([]);
 
       const formPromise1 = sendMessage({

@@ -3,6 +3,8 @@
  * These are stateless helpers extracted for testability.
  */
 
+import type { LoginData } from './utils';
+
 /**
  * Parse a range filter string into a Set of 0-based indices.
  * Supports formats: "1,3,5" or "1-5" or "1-3,7,10-12"
@@ -65,7 +67,7 @@ export function isValidLogin(login: Record<string, unknown>): boolean {
  * Extract a safe display name from login data for logging.
  * Never exposes the password.
  */
-export function loginDisplayName(login: Record<string, unknown>): string {
+export function loginDisplayName(login: Partial<LoginData>): string {
   const userName = String(login['User Name'] || 'unknown');
   const playerName = String(login['Player Name'] || '');
   if (playerName) {

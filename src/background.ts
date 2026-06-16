@@ -72,7 +72,7 @@ async function processLoginQueue() {
   }
 
   try {
-    logToStorage(`Logging in as: ${loginDisplayName(currentLogin)}`);
+    logToStorage(`Logging in as: ${loginDisplayName(currentLogin!)}`);
 
     // Clear cookies for fresh login
     const cookies = await chrome.cookies.getAll({ domain: ".instantwar.com" });
@@ -94,7 +94,7 @@ async function processLoginQueue() {
       });
     }
   } catch (error) {
-    logToStorage(`Error processing login for ${loginDisplayName(currentLogin)}: ${error}`, 'error');
+    logToStorage(`Error processing login for ${loginDisplayName(currentLogin!)}: ${String(error)}`, 'error');
     loginInProcess = false;
     processLoginQueue();
   }
@@ -122,10 +122,8 @@ async function updateRefreshProgress(current: number, total: number, active: boo
 
 async function groupTabByLogin(tabId: number, login: LoginData) {
   const groupName = login["Tab"] || "IW Accounts";
-  const groupColor = normalizeTabColor(login["Color"]) as chrome.tabGroups.ColorEnum;
-  const userName = loginDisplayName(login);
-
-  logToStorage(`groupTabByLogin: tabId=${tabId}, group="${groupName}", color="${groupColor}", user=${userName}`);
+  const groupColor = normalizeTabColor(login["Color"]);
+  logToStorage(`groupTabByLogin: tabId=${tabId}, group="${groupName}", color="${groupColor}", user=${loginDisplayName(login)}`);
 
   try {
     // Verify the tab exists and is in the right window
@@ -135,12 +133,12 @@ async function groupTabByLogin(tabId: number, login: LoginData) {
       windowId = tab.windowId;
       logToStorage(`groupTabByLogin: tab ${tabId} found in window ${windowId}, url=${tab.url}`);
     } catch (e) {
-      logToStorage(`groupTabByLogin: tab ${tabId} not found: ${e}`, 'error');
+      logToStorage(`groupTabByLogin: tab ${tabId} not found: ${String(e)}`, 'error');
       return;
     }
 
     if (!windowId) {
-      logToStorage(`groupTabByLogin: no windowId for tab ${tabId}`, 'error');
+      logToStorage(`groupTabByLogin: no windowId for tab ${tabId}`);
       return;
     }
 
@@ -161,13 +159,13 @@ async function groupTabByLogin(tabId: number, login: LoginData) {
       const groupId = await chrome.tabs.group({ tabIds: [tabId] });
       await chrome.tabGroups.update(groupId, {
         title: groupName,
-        color: groupColor,
+        color: groupColor as 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange' | 'grey' | undefined,
         collapsed: false,
       });
       logToStorage(`groupTabByLogin: SUCCESS - created group "${groupName}" (${groupColor}) with tab ${tabId}`);
     }
   } catch (error) {
-    logToStorage(`groupTabByLogin FAILED for tab ${tabId} (user=${userName}): ${error}`, 'error');
+    logToStorage(`groupTabByLogin FAILED for tab ${tabId} (user=${loginDisplayName(login)}): ${String(error)}`, 'error');
   }
 }
 
@@ -239,7 +237,7 @@ chrome.runtime.onMessage.addListener(async (message, _sender) => {
   }
   
   else if (message.action === 'loginFormSubmitted') {
-    const loginName = loginDisplayName(message.login);
+    const loginName = loginDisplayName(message.login as LoginData);
     // Use the tab ID we tracked from processLoginQueue — NOT _sender.tab?.id
     // because the content script may have been re-injected and the sender ID is stale
     const tabId = currentLoginTabId;
@@ -257,7 +255,7 @@ chrome.runtime.onMessage.addListener(async (message, _sender) => {
 
       // Group the tab
       try {
-        await groupTabByLogin(tabId, message.login);
+        await groupTabByLogin(tabId, message.login as LoginData);
       } catch (error) {
         logToStorage(`Grouping failed for ${loginName}: ${error}`, 'error');
       }
@@ -313,7 +311,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           login: currentLogin,
         });
       } catch (error) {
-        logToStorage(`Error processing authorization tab: ${error}`, 'error');
+        logToStorage(`Error processing authorization tab: ${String(error)}`, 'error');
         loginInProcess = false;
         processLoginQueue();
       }

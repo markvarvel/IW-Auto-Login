@@ -56,7 +56,7 @@ import { setupChromeMock } from './__mocks__/chrome';describe('utils.ts', () => 
 
     it('reports missing required columns', async () => {
       const { validateLoginData } = await import('./utils');
-      const data = [{ 'Player Name': 'alice' }];
+      const data = [{ 'Player Name': 'alice' } as import('./utils').LoginData];
       const result = validateLoginData(data);
       expect(result.isValid).toBe(false);
       expect(result.missingColumns).toContain('User Name');

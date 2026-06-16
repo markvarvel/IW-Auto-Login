@@ -96,9 +96,15 @@ const tabsCreate = vi.fn(async (props?: chrome.tabs.CreateProperties): Promise<c
   index: 0,
   highlighted: false,
   pinned: false,
+  incognito: false,
+  frozen: false,
+  selected: false,
+  discarded: false,
+  autoDiscardable: true,
+  groupId: -1,
   status: 'complete',
 }));
-const tabsUpdate = vi.fn(async (_tabId: number, _updateProperties: chrome.tabs.TabUpdateProperties): Promise<chrome.tabs.Tab | undefined> => undefined);
+const tabsUpdate = vi.fn(async (_tabId: number, _updateProperties: chrome.tabs.UpdateProperties): Promise<chrome.tabs.Tab | undefined> => undefined);
 const tabsReload = vi.fn(async (_tabId: number): Promise<void> => undefined);
 const tabsGet = vi.fn(async (tabId: number): Promise<chrome.tabs.Tab> => ({
   id: tabId,
@@ -108,6 +114,12 @@ const tabsGet = vi.fn(async (tabId: number): Promise<chrome.tabs.Tab> => ({
   index: 0,
   highlighted: false,
   pinned: false,
+  incognito: false,
+  frozen: false,
+  selected: false,
+  discarded: false,
+  autoDiscardable: true,
+  groupId: -1,
   status: 'complete',
 }));
 const tabsGroup = vi.fn(async (_options: chrome.tabs.GroupOptions): Promise<number> => 1);
@@ -115,12 +127,12 @@ const tabsSendMessage = vi.fn(async (_tabId: number, _message: unknown): Promise
 
 // ---------- chrome.cookies ----------
 
-const cookiesGetAll = vi.fn(async (_filter: chrome.cookies.CookieSearchDetails): Promise<chrome.cookies.Cookie[]> => []);
+const cookiesGetAll = vi.fn(async (_filter: Record<string, unknown>): Promise<chrome.cookies.Cookie[]> => []);
 const cookiesRemove = vi.fn(async (_details: { url: string; name: string }): Promise<void> => undefined);
 
 // ---------- chrome.scripting ----------
 
-const scriptingExecuteScript = vi.fn(async (_details: chrome.scripting.ScriptInjection<unknown[], void>): Promise<chrome.scripting.InjectedResult[]> => []);
+const scriptingExecuteScript = vi.fn(async (_details: Record<string, unknown>): Promise<chrome.scripting.InjectionResult[]> => []);
 
 // ---------- chrome.tabGroups ----------
 
