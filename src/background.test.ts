@@ -234,14 +234,8 @@ describe('background.ts — login flow', () => {
       await sendMessage({ action: 'startAutomatedLogin', loginCredentials: [login] });
       await vi.advanceTimersByTimeAsync(4000);
 
-      // Check that logToStorage was called with loginDisplayName
-      const setCalls = mocks.storageLocal.set.mock.calls;
-      const allSetData = setCalls.map((c: Record<string, unknown>[]) => JSON.stringify(c[0]));
-      const logString = allSetData.find((s: string) => s.includes('bob'));
-
       // The extensionLogs should contain "Logging in as: bob (BobTheBuilder)"
       const getCall = mocks.storageLocal.get.mock.calls;
-      // Find the call that reads extensionLogs
       const logsCall = getCall.find((c: unknown[]) => {
         const keys = c[0];
         return Array.isArray(keys) && keys.includes('extensionLogs');
