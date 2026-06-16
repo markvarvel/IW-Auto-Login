@@ -35,11 +35,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Zip dist folder
-        run: cd dist && zip -r ../iw-auto-login-dist.zip .
+      - name: Get version and zip dist folder
+        id: version
+        run: |n          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          cd dist && zip -r "../iw-auto-login-v${VERSION}.zip" .
+          echo "zipname=iw-auto-login-v${VERSION}.zip" >> "$GITHUB_OUTPUT"
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iw-auto-login-dist
-          path: iw-auto-login-dist.zip
+          name: iw-auto-login-v${{ steps.version.outputs.version }}
+          path: ${{ steps.version.outputs.zipname }}
