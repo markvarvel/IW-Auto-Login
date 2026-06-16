@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Zip dist folder
+        run: cd dist && zip -r ../iw-auto-login-dist.zip .
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/}"
+          PREV_TAG=$(git tag --sort=-version:refname | grep -A1 "^${TAG}$" | tail -1)
+
+          NOTES="## What's Changed"$'\n\n'
+
+          if [ -z "$PREV_TAG" ] || [ "$PREV_TAG" = "$TAG" ]; then
+            NOTES+="- Initial release"
+          else
+            while IFS= read -r msg; do
+              [ -z "$msg" ] && continue
+              NOTES+="- ${msg}"$'\n'
+            done < <(git log "${PREV_TAG}..${TAG}" --pretty=format:"%s" --no-merges)
+          fi
+
+          if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$TAG" ]; then
+            NOTES+=$'\n\n'"**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${TAG}"
+          fi
+
+          printf '%s\n' "$NOTES" > /tmp/release_body.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: iw-auto-login-dist.zip
+          body_path: /tmp/release_body.md

@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "InstantWar-Auto-Login",
+  "version": "1.0.32",
+  "description": "Automated login, refresh, and tab management for InstantWar.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "cookies",
+    "tabGroups",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "assets/background-v1.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

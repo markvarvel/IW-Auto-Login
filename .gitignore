@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-temp/
+
+# Build artifacts (zip files)
+*.zip
+
+# Sensitive files (xlsx spreadsheets — may contain credentials)
+*.xlsx
+!public/IW-Logins-Template.xlsx
+
+# Environment / secrets
+.env
+.env.*
+*.env.local
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Vite env local overrides
+*.local
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
