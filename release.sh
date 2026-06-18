@@ -156,6 +156,8 @@ ok "All checks passed"
 
 if [ "$DRY_RUN" = true ]; then
   TAG="v$NEW_VERSION"
+  # Revert version bump files so working tree stays clean
+  git checkout -- package.json public/manifest.json
   echo ""
   ok "Dry run complete. Would have:"
   echo "  • Committed version bump: $CURRENT_VERSION → $NEW_VERSION"
