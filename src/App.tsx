@@ -110,6 +110,8 @@ export default function App() {
     severity: 'info' | 'error' | 'success' | 'warning' = 'info',
     action?: { label: string; onClick: () => void },
   ) => {
+    // Always show errors; gate other severities on showNotifications setting
+    if (severity !== 'error' && !settings.showNotifications) return;
     setSnackbar({ open: true, message, severity, action });
   };
 
