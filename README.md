@@ -1,7 +1,7 @@
 # IW-Auto-Login
 
 [![Latest Release](https://img.shields.io/github/v/release/markvarvel/IW-Auto-Login?label=Latest%20Release)](https://github.com/markvarvel/IW-Auto-Login/releases/latest)
-[![Download](https://img.shields.io/badge/Download-iw--auto--login--dist.zip-blue?style=for-the-badge)](https://github.com/markvarvel/IW-Auto-Login/releases/latest/download/iw-auto-login-dist.zip)
+[![Download](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://github.com/markvarvel/IW-Auto-Login/releases/latest)
 
 > ⚠️ **End users:** Do NOT click the green **Code** button — that downloads the raw source code and will NOT work as an extension. Download the ready-to-load zip from **[Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest)** instead.
 
@@ -17,7 +17,7 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
-1. **Download** the latest [iw-auto-login-dist.zip](https://github.com/markvarvel/IW-Auto-Login/releases/latest/download/iw-auto-login-dist.zip) from GitHub Releases
+1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the filename will be `iw-auto-login-vX.X.X.zip`
 2. **Extract** the zip file to a permanent folder
    - **Windows:** `C:\Extensions\IW-Auto-Login\`
    - **macOS:** `~/Extensions/IW-Auto-Login/`

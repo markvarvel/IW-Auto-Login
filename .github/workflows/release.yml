@@ -63,6 +63,19 @@ jobs:
           fi
           echo "Tag version matches package.json: $TAG_VERSION"
 
+      - name: Validate README mentions latest version
+        run: |
+          VERSION="${{ github.ref_name }}"
+          if ! grep -q "iw-auto-login-v" README.md; then
+            echo "ERROR: README.md does not mention versioned zip filename (iw-auto-login-vX.X.X.zip)"
+            exit 1
+          fi
+          if grep -q "iw-auto-login-dist.zip" README.md; then
+            echo "ERROR: README.md still references old zip filename 'iw-auto-login-dist.zip'"
+            exit 1
+          fi
+          echo "README.md versioned zip references are correct."
+
       - name: Zip dist folder
         run: |
           cd dist && zip -r "../iw-auto-login-${{ github.ref_name }}.zip" .
