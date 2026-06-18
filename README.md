@@ -118,6 +118,22 @@ The extension uses the **File System Access API** (`window.showOpenFilePicker`) 
 2. **Start Refresh** — Reloads all open InstantWar tabs sequentially (waits ~27s between each)
 3. **Stop Refresh** — Cancels the refresh cycle
 
+### Settings Tab
+
+Configure extension preferences. All settings are saved to Chrome storage and persist across sessions.
+
+**Startup**
+- **Default Tab** — Choose which tab opens when you launch the extension (Login, Refresh, Logs, or Settings)
+
+**Automation**
+- **Confirm before starting automation** — When enabled, a confirmation dialog appears before login or refresh starts. Helps prevent accidental clicks.
+- **Show notifications** — When enabled, the extension shows snackbar notifications for actions like "Starting login automation..."
+
+**Danger Zone**
+- **Clear All Data** — Removes all saved settings, login data, recent files, and logs. Requires a second click to confirm. Use this if you want a fresh start.
+
+**Dark Mode** — Click the icon in the header (top right) to cycle through System, Dark, and Light themes. Your preference is saved automatically.
+
 ## Excel File Format
 
 The `.xlsx` file should have a single sheet with these column headers:
