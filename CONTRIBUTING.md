@@ -64,6 +64,14 @@ npm run test:coverage # Run with coverage report
 
 Tests use Vitest and jsdom. Mock Chrome APIs are in `__mocks__/chrome.ts`.
 
+### CHANGELOG lint
+
+```bash
+npm run lint:changelog
+```
+
+Validates that `CHANGELOG.md` follows the [Keep a Changelog](https://keepachangelog.com/) format. Checks header lines, version headers, bullet items, and comparison links. Run this after editing the changelog manually.
+
 ## CI Pipeline
 
 Every push to `main` and every pull request runs the full CI pipeline:

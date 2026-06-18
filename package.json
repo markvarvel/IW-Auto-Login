@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "lint:changelog": "bash lint-changelog.sh",
     "prepare": "husky"
   },
   "dependencies": {
