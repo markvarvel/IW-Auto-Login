@@ -75,16 +75,6 @@ The extension does **not** bundle your login data. On first run you'll be prompt
 4. **Choose it in the extension** — Open the extension popup → Login tab → click **Choose XLSX File** → select your saved file.
 5. **Done!** — The extension will auto-reload your file every time you open the popup. If the file is moved or deleted, you'll be prompted to choose it again.
 
-### Dark Mode
-
-Click the theme icon in the header (top right) to cycle through three modes:
-
-- **System** — Follows your OS dark/light preference (default)
-- **Dark** — Always dark theme
-- **Light** — Always light theme
-
-Your choice is saved to Chrome storage automatically and persists across sessions.
-
 ### Reloading
 
 Click **Reload File** to re-read your xlsx from disk (picks up any changes you've made). If the file reference has expired (e.g. browser restart), the extension will ask you to choose it again.
@@ -105,6 +95,16 @@ The extension uses the **File System Access API** (`window.showOpenFilePicker`) 
 **Extension popup fallback** — Chrome extension popups don't have access to the File System Access API, so the extension automatically falls back to a standard `<input type="file">` element. This works identically but requires you to re-select the file if the browser restarts. The extension stores your recent files in IndexedDB, so switching between files is still fast.
 
 **Recent Files** — The extension remembers up to 5 recently used xlsx files in IndexedDB. Use the **Recent Files** dropdown to switch between them without re-browsing.
+
+### Dark Mode
+
+Click the theme icon in the header (top right) to cycle through three modes:
+
+- **System** — Follows your OS dark/light preference (default)
+- **Dark** — Always dark theme
+- **Light** — Always light theme
+
+Your choice is saved to Chrome storage automatically and persists across sessions.
 
 ## Usage
 
@@ -141,8 +141,6 @@ Configure extension preferences. All settings are saved to Chrome storage and pe
 
 **Danger Zone**
 - **Clear All Data** — Removes all saved settings, login data, recent files, and logs. Requires a second click to confirm. Use this if you want a fresh start.
-
-**Dark Mode** — Click the icon in the header (top right) to cycle through System, Dark, and Light themes. Your preference is saved automatically.
 
 ## Excel File Format
 
