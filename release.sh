@@ -6,7 +6,8 @@ set -euo pipefail
 #   ./release.sh              # Auto-increment patch (1.0.52 → 1.0.53)
 #   ./release.sh 1.1.0        # Set explicit version
 #   ./release.sh --dry-run    # Preview what would happen
-#   ./release.sh 1.1.0 --dry-run
+#   ./release.sh --skip-tests # Skip running tests (for quick releases)
+#   ./release.sh 1.1.0 --dry-run --skip-tests
 #
 # What it does:
 #   1. Run typecheck, tests, and lint
@@ -94,10 +95,12 @@ version_gt() {
 
 # Parse arguments
 DRY_RUN=false
+SKIP_TESTS=false
 VERSION_ARG=""
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=true ;;
+    --skip-tests) SKIP_TESTS=true ;;
     *) VERSION_ARG="$arg" ;;
   esac
 done
@@ -105,6 +108,9 @@ done
 if [ "$DRY_RUN" = true ]; then
   info "DRY RUN — no commits, tags, or pushes will be made"
   echo ""
+fi
+if [ "$SKIP_TESTS" = true ]; then
+  warn "Skipping tests (--skip-tests)"
 fi
 
 if [ -n "$VERSION_ARG" ]; then
@@ -144,8 +150,12 @@ ok "Version: $CURRENT_VERSION → $NEW_VERSION"
 info "Running typecheck..."
 npm run typecheck || fail "Typecheck failed"
 
-info "Running tests..."
-npm run test || fail "Tests failed"
+if [ "$SKIP_TESTS" != true ]; then
+  info "Running tests..."
+  npm run test || fail "Tests failed"
+else
+  warn "Tests skipped"
+fi
 
 info "Running lint..."
 npm run lint || fail "Lint failed"

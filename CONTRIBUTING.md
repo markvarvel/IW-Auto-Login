@@ -161,6 +161,13 @@ Releases are automated via `release.sh`. The script handles validation, versioni
 # Preview what would happen without committing or pushing
 ./release.sh --dry-run
 ./release.sh 1.1.0 --dry-run
+
+# Skip tests (for quick releases when tests were already run)
+./release.sh --skip-tests
+./release.sh 1.1.0 --skip-tests
+
+# Combine flags
+./release.sh --dry-run --skip-tests
 ```
 
 The script performs:
@@ -173,6 +180,8 @@ The script performs:
 7. **Workflow monitoring** — polls GitHub Actions until the release completes (or times out after 5 minutes)
 
 **`--dry-run`**: Runs steps 1–4 (pre-flight checks, semver validation, typecheck/test/lint, version bump preview) but skips commit, tag, push, and workflow monitoring. Reverts version files before exit so the working tree stays clean. Useful for verifying everything is ready before actually releasing.
+
+**`--skip-tests`**: Skips the `npm run test` step but still runs typecheck and lint. Use when you've already verified tests pass and want a faster release.
 
 On success, the script prints the release URL and lists the published assets.
 
