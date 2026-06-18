@@ -21,16 +21,16 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
 ```
- 1. DOWNLOAD                  2. EXTRACT                    3. LOAD IN CHROME
- ─────────────               ──────────────                ──────────────────
- ┌─────────────────────┐     ┌───────────────────────┐     chrome://extensions/
- │ 📦 iw-auto-login-   │     │ 📁 iw-auto-login-     │     ┌──────────────────┐
- │    v1.0.50.zip      │ ──► │    v1.0.50/           │ ──► │  IW-Auto-Login   │
- └─────────────────────┘     │  ├── manifest.json    │     │  ✅ Enabled      │
-                             │  ├── assets/          │     └──────────────────┘
-   From: GitHub Releases     │  ├── icon*.png        │
-                             │  └── ...              │     Select the extracted
-                             └───────────────────────┘     folder in Load unpacked
+ 1. DOWNLOAD                      2. EXTRACT                        3. LOAD IN CHROME
+ ─────────────                   ──────────────                    ──────────────────
+ ┌─────────────────────────┐     ┌───────────────────────┐         chrome://extensions/
+ │ 📦 IW-Auto-Login-      │     │ 📁 IW-Auto-Login-     │         ┌──────────────────┐
+ │    vX.X.X.zip           │ ──► │    vX.X.X/            │ ──►     │  IW-Auto-Login   │
+ └─────────────────────────┘     │  ├── manifest.json    │         │  ✅ Enabled      │
+                                 │  ├── assets/          │         └──────────────────┘
+   From: GitHub Releases         │  ├── icon*.png        │
+                                 │  └── ...              │         Select the extracted
+                                 └───────────────────────┘         folder in Load unpacked
 ```
 
 1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.50.zip`)
