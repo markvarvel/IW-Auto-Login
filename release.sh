@@ -7,8 +7,10 @@ set -euo pipefail
 #   ./release.sh 1.1.0        # Set explicit version
 #   ./release.sh --dry-run    # Preview what would happen
 #   ./release.sh --skip-tests # Skip running tests (for quick releases)
+#   ./release.sh --skip-typecheck # Skip typecheck (for quick releases)
+#   ./release.sh --skip-lint  # Skip lint (for quick releases)
 #   ./release.sh --no-monitor # Skip workflow monitoring (faster completion)
-#   ./release.sh 1.1.0 --dry-run --skip-tests --no-monitor
+#   ./release.sh 1.1.0 --dry-run --skip-tests --skip-typecheck --skip-lint --no-monitor
 #
 # What it does:
 #   1. Run typecheck, tests, and lint
@@ -97,12 +99,16 @@ version_gt() {
 # Parse arguments
 DRY_RUN=false
 SKIP_TESTS=false
+SKIP_TYPECHECK=false
+SKIP_LINT=false
 NO_MONITOR=false
 VERSION_ARG=""
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=true ;;
     --skip-tests) SKIP_TESTS=true ;;
+    --skip-typecheck) SKIP_TYPECHECK=true ;;
+    --skip-lint) SKIP_LINT=true ;;
     --no-monitor) NO_MONITOR=true ;;
     *) VERSION_ARG="$arg" ;;
   esac
@@ -120,6 +126,12 @@ if [ "$DRY_RUN" = true ]; then
 fi
 if [ "$SKIP_TESTS" = true ]; then
   warn "Skipping tests (--skip-tests)"
+fi
+if [ "$SKIP_TYPECHECK" = true ]; then
+  warn "Skipping typecheck (--skip-typecheck)"
+fi
+if [ "$SKIP_LINT" = true ]; then
+  warn "Skipping lint (--skip-lint)"
 fi
 if [ "$NO_MONITOR" = true ]; then
   info "Skipping workflow monitoring (--no-monitor)"
@@ -159,8 +171,12 @@ ok "Version: $CURRENT_VERSION → $NEW_VERSION"
 
 # ─── Run validation ─────────────────────────────────────────────────
 
-info "Running typecheck..."
-npm run typecheck || fail "Typecheck failed"
+if [ "$SKIP_TYPECHECK" != true ]; then
+  info "Running typecheck..."
+  npm run typecheck || fail "Typecheck failed"
+else
+  warn "Typecheck skipped"
+fi
 
 if [ "$SKIP_TESTS" != true ]; then
   info "Running tests..."
@@ -169,8 +185,12 @@ else
   warn "Tests skipped"
 fi
 
-info "Running lint..."
-npm run lint || fail "Lint failed"
+if [ "$SKIP_LINT" != true ]; then
+  info "Running lint..."
+  npm run lint || fail "Lint failed"
+else
+  warn "Lint skipped"
+fi
 
 ok "All checks passed"
 
