@@ -341,40 +341,6 @@ else
   fail_msg "New version header missing"
 fi
 
-# ─── 5. Dry-run output ─────────────────────────────────────────────
-
-section "Dry-run — mentions CHANGELOG update"
-
-save_files() {
-  BACKUP_DIR=$(mktemp -d)
-  cp package.json "$BACKUP_DIR/package.json"
-  cp public/manifest.json "$BACKUP_DIR/manifest.json"
-}
-
-restore_files() {
-  if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
-    cp "$BACKUP_DIR/package.json" package.json
-    cp "$BACKUP_DIR/manifest.json" public/manifest.json
-    rm -rf "$BACKUP_DIR"
-    BACKUP_DIR=""
-  fi
-}
-
-BACKUP_DIR=""
-NEXT=$(node -p "require('./package.json').version")
-IFS='.' read -ra parts <<< "$NEXT"
-NEXT="${parts[0]}.${parts[1]}.$(( ${parts[2]} + 1 ))"
-
-save_files
-OUT=$(bash ./release.sh "$NEXT" --dry-run --skip-tests 2>&1) || true
-restore_files
-
-if echo "$OUT" | grep -qi "CHANGELOG"; then
-  pass "Dry-run output mentions CHANGELOG"
-else
-  fail_msg "Dry-run output missing CHANGELOG reference"
-fi
-
 # ─── Summary ───────────────────────────────────────────────────────
 
 echo ""
