@@ -152,6 +152,42 @@ At minimum, you only need to fill in `User Name` and `Password` per account.
 | player1 | Hero1 | p1@email.com | pass123 | old1 | GroupA | 1 | blue |
 | player2 | Hero2 | p2@email.com | pass456 | old2 | GroupA | 2 | blue |
 
+## Troubleshooting
+
+### "Load unpacked" button is grayed out
+You need to enable **Developer mode** — toggle it on in the top-right corner of `chrome://extensions/`.
+
+### Extension won't load / shows an error
+- Make sure you selected the **extracted folder** (e.g., `iw-auto-login-v1.0.49/`), **not** the zip file itself
+- The folder must contain `manifest.json` at the top level — if you see the zip file inside the folder, you selected the wrong level
+- Try removing the extension and loading it again
+
+### "File reference expired" or "Cannot read file"
+This happens when Chrome clears the file handle (usually after a browser restart or update). Simply click **Choose XLSX File** again to re-select your file. The extension will remember it until the next time the handle is cleared.
+
+### "No valid login data found"
+Your xlsx file must have the correct column headers. At minimum, you need a **`User Name`** column and a **`Password`** column. See the [Excel File Format](#excel-file-format) section for the full list of supported columns.
+
+### Extension disappears after moving the folder
+Chrome needs the extension folder to stay in the **same location** on disk. If you move or rename the folder, Chrome can't find the extension anymore. Move it back, or remove and re-load it.
+
+### Login automation isn't working
+- Make sure you have InstantWar tabs open
+- Check that the **Range Filter** is correct (or leave it blank for all accounts)
+- Try clicking **Reload File** to refresh your account data
+- Check the **Logs** tab for error messages
+
+### Refresh isn't working
+- Make sure you have InstantWar tabs open in the browser
+- The refresh waits ~27 seconds between each tab — be patient
+- Try entering a specific tab range (e.g., `1-3`) to test with fewer tabs
+
+### Brave Browser
+The extension works with Brave, but some features may behave slightly differently. If you run into issues, try switching to Chrome to see if the problem persists.
+
+### Still stuck?
+Open an issue on [GitHub Issues](https://github.com/markvarvel/IW-Auto-Login/issues) with a description of the problem and any error messages you see.
+
 ## Changelog
 
 See [Releases](https://github.com/markvarvel/IW-Auto-Login/releases) for full changelog.
