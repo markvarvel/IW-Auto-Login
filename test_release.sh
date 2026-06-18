@@ -339,6 +339,9 @@ else
 fi
 
 # ─── 5. Validation execution ──────────────────────────────────────
+# Note: "runs when not skipped" tests are intentionally absent —
+# CI already validates typecheck/lint execution in dedicated steps.
+# These tests only verify that the skip flags work correctly.
 
 section "Validation — typecheck skipped with --skip-typecheck"
 
