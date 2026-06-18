@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.0.53] - 2026-06-18
+
+- Fix changelog links: auto-update comparison URLs on release
+- Add CHANGELOG.md with release history; auto-generate entries in release.sh
+- Add --skip-tests flag to release.sh and document in CONTRIBUTING.md
+- Document --dry-run flag in CONTRIBUTING.md release process
+- Fix dry-run: revert version files before exit to keep working tree clean
+- Add --dry-run flag to release.sh: preview release without committing
+- Update CONTRIBUTING.md: document release.sh usage in release process
+- Add semver validation to release.sh: reject invalid formats and downgrades
+- Add release.sh: automated release script with validation, version bump, tag, push, and workflow monitoring
+- Move Dark Mode docs to end of Setup section; remove duplicate from Settings Tab
+- Add Dark Mode section to README Setup docs
+
 ## [1.0.52] - 2026-06-18
 
 ### Added
@@ -78,7 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - Initial public release
 
-[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.52...HEAD
+[1.0.53]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.52...v1.0.53
+[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.53...HEAD
 [1.0.52]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.51...v1.0.52
 [1.0.51]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.50...v1.0.51
 [1.0.50]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.49...v1.0.50
