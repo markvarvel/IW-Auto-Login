@@ -79,10 +79,12 @@ restore_files() {
 }
 
 # Run release.sh and capture output + exit code
+# --skip-tests is always used since these tests validate argument parsing,
+# not actual test execution (CI runs tests separately).
 run_release() {
   local exit_code=0
   local output
-  output=$(bash ./release.sh "$@" 2>&1) || exit_code=$?
+  output=$(bash ./release.sh "$@" --skip-tests 2>&1) || exit_code=$?
   echo "$output"
   return $exit_code
 }
@@ -97,7 +99,7 @@ section "Argument parsing — --dry-run flag"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "DRY RUN"; then
@@ -116,10 +118,11 @@ section "Argument parsing — --skip-tests flag"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
-if echo "$OUT" | grep -qi "skip"; then
+if echo "$OUT" | grep -qi "skip";
+then
   pass "--skip-tests flag detected in output"
 else
   fail_msg "--skip-tests flag not detected in output"
@@ -128,7 +131,7 @@ fi
 section "Argument parsing — explicit version"
 
 save_files
-OUT=$(run_release "99.0.1" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "99.0.1" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "99.0.1"; then
@@ -140,7 +143,7 @@ fi
 section "Argument parsing — combined flags"
 
 save_files
-OUT=$(run_release "99.0.2" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "99.0.2" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "DRY RUN" && echo "$OUT" | grep -qi "skip"; then
@@ -153,7 +156,7 @@ section "Argument parsing — --no-monitor flag"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint --no-monitor) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint --no-monitor) || true
 restore_files
 
 if echo "$OUT" | grep -qi "no-monitor\|skipping workflow monitoring"; then
@@ -169,7 +172,7 @@ section "Semver validation — invalid formats rejected"
 save_files
 
 for ver in "abc" "1.0" "1.0.0.0" "v1.0.0" "1.0.0-rc" "1..0" ".1.0"; do
-  OUT=$(run_release "$ver" --dry-run --skip-tests --skip-typecheck --skip-lint) 2>/dev/null && {
+  OUT=$(run_release "$ver" --dry-run --skip-typecheck --skip-lint) 2>/dev/null && {
     fail_msg "Should reject invalid version '$ver'"
     continue
   }
@@ -183,7 +186,7 @@ section "Semver validation — leading zeros rejected"
 save_files
 
 for ver in "01.0.0" "1.02.3" "1.0.03"; do
-  OUT=$(run_release "$ver" --dry-run --skip-tests --skip-typecheck --skip-lint) 2>/dev/null && {
+  OUT=$(run_release "$ver" --dry-run --skip-typecheck --skip-lint) 2>/dev/null && {
     fail_msg "Should reject leading zeros in '$ver'"
     continue
   }
@@ -196,10 +199,11 @@ section "Semver validation — valid formats accepted"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
-if echo "$OUT" | grep -q "Dry run complete"; then
+if echo "$OUT" | grep -q "Dry run complete";
+then
   pass "Valid version $NEXT accepted"
 else
   fail_msg "Valid version $NEXT rejected"
@@ -209,7 +213,7 @@ section "Semver validation — downgrade rejected"
 
 save_files
 CURRENT=$(get_version)
-OUT=$(run_release "0.0.1" --dry-run --skip-tests --skip-typecheck --skip-lint) 2>/dev/null && {
+OUT=$(run_release "0.0.1" --dry-run --skip-typecheck --skip-lint) 2>/dev/null && {
   fail_msg "Should reject downgrade to 0.0.1 (current: $CURRENT)"
   restore_files
 }
@@ -229,7 +233,7 @@ ORIG_PKG=$(cat package.json)
 ORIG_MANIFEST=$(cat public/manifest.json)
 NEXT=$(next_patch)
 
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 
 NEW_PKG=$(cat package.json)
 NEW_MANIFEST=$(cat public/manifest.json)
@@ -252,7 +256,7 @@ section "Dry-run — no tags created"
 save_files
 NEXT=$(next_patch)
 
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 
 restore_files
 
@@ -267,7 +271,7 @@ section "Dry-run — no commits created"
 save_files
 NEXT=$(next_patch)
 
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 
 restore_files
 
@@ -282,7 +286,7 @@ section "Dry-run — shows expected release summary"
 save_files
 NEXT=$(next_patch)
 
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 
 restore_files
 
@@ -309,7 +313,7 @@ fi
 section "Edge cases — v-prefix stripped from version"
 
 save_files
-OUT=$(run_release "v99.0.3" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "v99.0.3" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "99.0.3"; then
@@ -325,7 +329,7 @@ BEFORE=$(get_version)
 IFS='.' read -ra parts <<< "$BEFORE"
 EXPECTED="${parts[0]}.${parts[1]}.$(( ${parts[2]} + 1 ))"
 
-OUT=$(run_release --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "$EXPECTED"; then
@@ -340,10 +344,11 @@ section "Validation — typecheck skipped with --skip-typecheck"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
-if echo "$OUT" | grep -q "Skipping typecheck"; then
+if echo "$OUT" | grep -q "Skipping typecheck";
+then
   pass "Typecheck skipped with --skip-typecheck"
 else
   fail_msg "Typecheck should be skipped with --skip-typecheck"
@@ -353,7 +358,7 @@ section "Validation — lint skipped with --skip-lint"
 
 save_files
 NEXT=$(next_patch)
-OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+OUT=$(run_release "$NEXT" --dry-run --skip-typecheck --skip-lint) || true
 restore_files
 
 if echo "$OUT" | grep -q "Skipping lint"; then
