@@ -349,7 +349,7 @@ else
   fail_msg "Typecheck should run when --skip-typecheck is not passed"
 fi
 
-if echo "$OUT" | grep -q "Typecheck skipped"; then
+if echo "$OUT" | grep -q "Skipping typecheck"; then
   fail_msg "Typecheck should NOT be skipped when --skip-typecheck is not passed"
 else
   pass "Typecheck not skipped as expected"
@@ -368,7 +368,7 @@ else
   fail_msg "Lint should run when --skip-lint is not passed"
 fi
 
-if echo "$OUT" | grep -q "Lint skipped"; then
+if echo "$OUT" | grep -q "Skipping lint"; then
   fail_msg "Lint should NOT be skipped when --skip-lint is not passed"
 else
   pass "Lint not skipped as expected"
@@ -381,7 +381,7 @@ NEXT=$(next_patch)
 OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
 restore_files
 
-if echo "$OUT" | grep -q "Typecheck skipped"; then
+if echo "$OUT" | grep -q "Skipping typecheck"; then
   pass "Typecheck skipped with --skip-typecheck"
 else
   fail_msg "Typecheck should be skipped with --skip-typecheck"
@@ -394,7 +394,7 @@ NEXT=$(next_patch)
 OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
 restore_files
 
-if echo "$OUT" | grep -q "Lint skipped"; then
+if echo "$OUT" | grep -q "Skipping lint"; then
   pass "Lint skipped with --skip-lint"
 else
   fail_msg "Lint should be skipped with --skip-lint"
