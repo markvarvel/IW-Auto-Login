@@ -39,11 +39,11 @@ jobs:
       - name: Validate README mentions latest version
         run: |
           if ! grep -q "iw-auto-login-v" README.md; then
-            echo "ERROR: README.md does not mention versioned zip filename (iw-auto-login-vX.X.X.zip)"
+            echo "ERROR: README.md does not mention versioned zip filename"
             exit 1
           fi
           if grep -q "iw-auto-login-dist.zip" README.md; then
-            echo "ERROR: README.md still references old zip filename 'iw-auto-login-dist.zip'"
+            echo "ERROR: README.md still references old zip filename"
             exit 1
           fi
           echo "README.md versioned zip references are correct."
@@ -71,22 +71,16 @@ jobs:
           SIZE_KB=$(du -k "$MUI_CHUNK" | cut -f1)
           echo "vendor-mui chunk: ${SIZE_KB}kB (limit: ${MAX_SIZE_KB}kB)"
           if [ "$SIZE_KB" -gt "$MAX_SIZE_KB" ]; then
-            echo "ERROR: vendor-mui chunk (${SIZE_KB}kB) exceeds ${MAX_SIZE_KB}kB limit!"
+            echo "ERROR: vendor-mui chunk exceeds limit!"
             exit 1
           fi
           echo "OK: vendor-mui chunk is within budget."
 
-      - name: Fix version in dist (build auto-bumps)
+      - name: Fix version in dist
         run: |
-          VERSION="${{ github.ref_name#v }}"
-          node -e "
-            const fs = require('fs');
-            const mPath = 'dist/manifest.json';
-            const m = JSON.parse(fs.readFileSync(mPath, 'utf8'));
-            m.version = '$VERSION';
-            fs.writeFileSync(mPath, JSON.stringify(m, null, 2));
-            console.log('Reset dist/manifest.json version to ' + '$VERSION');
-          "
+          VERSION="${{ github.ref_name }}"
+          VERSION="${VERSION#v}"
+          node -e "const fs=require('fs');const p='dist/manifest.json';const m=JSON.parse(fs.readFileSync(p,'utf8'));m.version='${VERSION}';fs.writeFileSync(p,JSON.stringify(m,null,2));console.log('Reset dist/manifest.json to',m.version)"
 
       - name: Zip dist folder
         run: |
