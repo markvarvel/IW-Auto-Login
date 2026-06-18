@@ -133,8 +133,8 @@ public/
    npm run typecheck && npm run test && npm run lint && npm run build
    ```
 4. Commit with a descriptive message
-   - The **pre-commit hook** automatically runs typecheck and tests before each commit
-   - If either fails, the commit is blocked — fix the issues first
+   - The **pre-commit hook** automatically runs typecheck, tests, and lint before each commit
+   - If any check fails, the commit is blocked — fix the issues first
 5. Push and open a pull request
 
 ### Code Style
