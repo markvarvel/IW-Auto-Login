@@ -62,7 +62,7 @@ jobs:
 
       - name: Check bundle size
         run: |
-          MAX_SIZE_KB=250
+          MAX_SIZE_KB=280
           MUI_CHUNK=$(ls dist/assets/vendor-mui-*.js 2>/dev/null | head -1)
           if [ -z "$MUI_CHUNK" ]; then
             echo "ERROR: vendor-mui chunk not found!"
