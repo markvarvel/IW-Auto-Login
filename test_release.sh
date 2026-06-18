@@ -334,6 +334,72 @@ else
   fail_msg "Auto-increment did not produce $EXPECTED"
 fi
 
+# ─── 5. Validation execution ──────────────────────────────────────
+
+section "Validation — typecheck runs when not skipped"
+
+save_files
+NEXT=$(next_patch)
+OUT=$(run_release "$NEXT" --dry-run --skip-tests) || true
+restore_files
+
+if echo "$OUT" | grep -q "Running typecheck"; then
+  pass "Typecheck runs when --skip-typecheck is not passed"
+else
+  fail_msg "Typecheck should run when --skip-typecheck is not passed"
+fi
+
+if echo "$OUT" | grep -q "Typecheck skipped"; then
+  fail_msg "Typecheck should NOT be skipped when --skip-typecheck is not passed"
+else
+  pass "Typecheck not skipped as expected"
+fi
+
+section "Validation — lint runs when not skipped"
+
+save_files
+NEXT=$(next_patch)
+OUT=$(run_release "$NEXT" --dry-run --skip-tests) || true
+restore_files
+
+if echo "$OUT" | grep -q "Running lint"; then
+  pass "Lint runs when --skip-lint is not passed"
+else
+  fail_msg "Lint should run when --skip-lint is not passed"
+fi
+
+if echo "$OUT" | grep -q "Lint skipped"; then
+  fail_msg "Lint should NOT be skipped when --skip-lint is not passed"
+else
+  pass "Lint not skipped as expected"
+fi
+
+section "Validation — typecheck skipped with --skip-typecheck"
+
+save_files
+NEXT=$(next_patch)
+OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+restore_files
+
+if echo "$OUT" | grep -q "Typecheck skipped"; then
+  pass "Typecheck skipped with --skip-typecheck"
+else
+  fail_msg "Typecheck should be skipped with --skip-typecheck"
+fi
+
+section "Validation — lint skipped with --skip-lint"
+
+save_files
+NEXT=$(next_patch)
+OUT=$(run_release "$NEXT" --dry-run --skip-tests --skip-typecheck --skip-lint) || true
+restore_files
+
+if echo "$OUT" | grep -q "Lint skipped"; then
+  pass "Lint skipped with --skip-lint"
+else
+  fail_msg "Lint should be skipped with --skip-lint"
+fi
+
 # ─── Summary ───────────────────────────────────────────────────────
 
 echo ""
