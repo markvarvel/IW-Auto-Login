@@ -147,7 +147,32 @@ public/
 
 ## Release Process
 
-Releases are automated. To create a new release:
+Releases are automated via `release.sh`. The script handles validation, versioning, tagging, and workflow monitoring in one step.
+
+### Using release.sh (recommended)
+
+```bash
+# Auto-increment patch version (1.0.52 → 1.0.53)
+./release.sh
+
+# Set an explicit version
+./release.sh 1.1.0
+```
+
+The script performs:
+1. **Pre-flight checks** — clean working tree, on `main` branch (warns if not)
+2. **Semver validation** — rejects invalid formats and version downgrades
+3. **Validation** — runs `typecheck`, `test`, and `lint`
+4. **Version bump** — updates `package.json` and `public/manifest.json`
+5. **Commit & tag** — commits the version bump, creates an annotated `vX.X.X` tag
+6. **Push** — pushes the commit and tag to origin
+7. **Workflow monitoring** — polls GitHub Actions until the release completes (or times out after 5 minutes)
+
+On success, the script prints the release URL and lists the published assets.
+
+### Manual release (alternative)
+
+If you prefer to release manually:
 
 1. Ensure all changes are committed and pushed to `main`
 2. Update `package.json` version (or let `npm run build` auto-bump it)
@@ -161,7 +186,9 @@ Releases are automated. To create a new release:
    git push origin vX.X.X
    ```
 
-The **release workflow** automatically:
+### What the release workflow does
+
+The **release workflow** (`release.yml`) automatically:
 - Validates the tag matches `package.json` version
 - Validates `README.md` references the correct zip filename
 - Runs typecheck, tests, lint, and build
