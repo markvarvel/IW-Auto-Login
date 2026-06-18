@@ -206,6 +206,17 @@ If you prefer to release manually:
    git push origin vX.X.X
    ```
 
+### CHANGELOG auto-update
+
+`release.sh` automatically updates `CHANGELOG.md` during each release. It:
+
+1. Collects commit messages since the previous tag
+2. Replaces the `[Unreleased]` header with a new `[X.Y.Z] - YYYY-MM-DD` section
+3. Inserts the commit messages as a bullet list under the new version
+4. Updates the comparison links at the bottom of the file
+
+If you want to add custom notes to a release, edit the `[Unreleased]` section in `CHANGELOG.md` before running `release.sh`. Any items listed there will be included in the new version's entry.
+
 ### What the release workflow does
 
 The **release workflow** (`release.yml`) automatically:
