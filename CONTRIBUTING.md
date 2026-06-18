@@ -72,7 +72,7 @@ Every push to `main` and every pull request runs the full CI pipeline:
 2. **Test** — `npm run test`
 3. **Lint** — `npm run lint`
 4. **Build** — `npm run build`
-5. **Bundle size check** — Fails if `vendor-mui` chunk exceeds 250kB
+5. **Bundle size check** — Fails if `vendor-mui` chunk exceeds 280kB
 6. **Zip** — Creates a versioned zip artifact (`iw-auto-login-vX.X.X.zip`)
 
 All steps must pass before merging.
@@ -140,7 +140,7 @@ public/
 ### Code Style
 
 - Use **deep MUI imports** (e.g., `import Button from '@mui/material/Button'`) — not barrel imports
-- Keep the `vendor-mui` chunk under 250kB
+- Keep the `vendor-mui` chunk under 280kB
 - All TypeScript strict checks are enabled (`noUnusedLocals`, `noUnusedParameters`, `noUncheckedIndexedAccess`)
 - Follow existing patterns for component structure and naming
 
@@ -164,7 +164,7 @@ The **release workflow** automatically:
 - Validates the tag matches `package.json` version
 - Validates `README.md` references the correct zip filename
 - Runs typecheck, tests, lint, and build
-- Checks bundle size (vendor-mui ≤ 250kB)
+- Checks bundle size (vendor-mui ≤ 280kB)
 - Resets the version in `dist/manifest.json` to the tag version
 - Creates a GitHub Release with `iw-auto-login-vX.X.X.zip`
 
@@ -172,7 +172,7 @@ The **release workflow** automatically:
 
 | Chunk | Max Size | Notes |
 |-------|----------|-------|
-| `vendor-mui` | 250kB | MUI components + Emotion styling engine |
+| `vendor-mui` | 280kB | MUI components + Emotion styling engine |
 | `main` | — | Application code (~15kB) |
 | `vendor-react` | — | React + ReactDOM (~195kB) |
 | `vendor-xlsx` | — | SheetJS library (~333kB) |
