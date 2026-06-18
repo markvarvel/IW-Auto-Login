@@ -18,29 +18,28 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
 ```
- 1. DOWNLOAD                2. EXTRACT                  3. LOAD IN CHROME
- ─────────────             ──────────────              ──────────────────
- ┌─────────────────┐       ┌─────────────────┐         chrome://extensions/
- │ 📦 iw-auto-    │  ───► │ 📁 dist/        │  ───►   ┌──────────────────┐
- │  login-v1.0.48 │ unzip │  ├── manifest   │  Load   │  IW-Auto-Login   │
- │     .zip       │       │  ├── assets/    │ unpacked│  ✅ Enabled      │
- └─────────────────┘       │  └── ...       │         └──────────────────┘
-                           └─────────────────┘
-   From: GitHub             To: Permanent            In: Chrome Extensions
-   Releases page            folder on your PC        (Developer mode ON)
+ 1. DOWNLOAD                  2. EXTRACT                    3. LOAD IN CHROME
+ ─────────────               ──────────────                ──────────────────
+ ┌─────────────────────┐     ┌───────────────────────┐     chrome://extensions/
+ │ 📦 iw-auto-login-   │     │ 📁 iw-auto-login-     │     ┌──────────────────┐
+ │    v1.0.49.zip      │ ──► │    v1.0.49/           │ ──► │  IW-Auto-Login   │
+ └─────────────────────┘     │  ├── manifest.json    │     │  ✅ Enabled      │
+                             │  ├── assets/          │     └──────────────────┘
+   From: GitHub Releases     │  ├── icon*.png        │
+                             │  └── ...              │     Select the extracted
+                             └───────────────────────┘     folder in Load unpacked
 ```
 
-1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.48.zip`)
+1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.49.zip`)
 2. **Extract** the zip to a permanent location on your computer
-   - The zip contains a single `dist/` folder — this **is** the complete extension, no other files are needed
-   - **Windows:** Extract to `C:\Extensions\IW-Auto-Login\dist\`
-   - **macOS:** Extract to `~/Extensions/IW-Auto-Login/dist/`
-   - **Linux:** Extract to `~/Extensions/IW-Auto-Login/dist/`
-   - ⚠️ **Do not move or delete the `dist` folder after loading it** — Chrome needs it to stay in the same place
+   - The extracted folder will be named `iw-auto-login-vX.X.X` (e.g., `iw-auto-login-v1.0.49`) and contains `manifest.json`, `assets/`, icons, etc. — this **is** the complete extension, no other files are needed
+   - **Windows:** Right-click the zip → **Extract All** → choose a permanent location (e.g., `C:\Extensions\`)
+   - **macOS/Linux:** Unzip the file (e.g., `unzip iw-auto-login-v1.0.49.zip -d ~/Extensions/`)
+   - ⚠️ **Do not move or delete this folder after loading it** — Chrome needs it to stay in the same place
 3. Open `chrome://extensions/` in Chrome (or `brave://extensions/` in Brave Browser)
 4. Enable **Developer mode** (toggle in top right)
 5. Click **Load unpacked**
-6. Select the `dist` folder you just extracted
+6. Select the extracted `iw-auto-login-vX.X.X` folder
 
 ### Option 2: Build from Source
 
@@ -56,7 +55,7 @@ npm install
 npm run build
 ```
 
-This creates a `dist/` folder in the project directory. Load it in Chrome using steps 3–6 above.
+This creates a `dist/` folder in the project directory. Load it in Chrome using steps 3–6 above (select the `dist` folder instead of the extracted zip folder).
 
 ## Setup — Connecting Your Login File
 
@@ -64,7 +63,7 @@ The extension does **not** bundle your login data. On first run you'll be prompt
 
 ### Quick Start
 
-1. **Open the bundled template** — Find `IW-Logins-Template.xlsx` inside the `dist/` folder (the same folder you loaded into Chrome). Open it in Excel, LibreOffice, or Google Sheets.
+1. **Open the bundled template** — Find `IW-Logins-Template.xlsx` inside the extracted `iw-auto-login-vX.X.X` folder (the same folder you loaded into Chrome). Open it in Excel, LibreOffice, or Google Sheets.
 2. **Add your accounts** — Fill in one row per account using the column format below.
 3. **Save as `.xlsx`** — Save the file somewhere persistent
    - **Windows:** `D:\IW\IW-Logins.xlsx` or `C:\Users\you\Google Drive\IW\IW-Logins.xlsx`
