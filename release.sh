@@ -162,12 +162,47 @@ npm run lint || fail "Lint failed"
 
 ok "All checks passed"
 
+# ─── Update CHANGELOG.md ───────────────────────────────────────────
+
+PREV_TAG="v$CURRENT_VERSION"
+if git rev-parse "$PREV_TAG" >/dev/null 2>&1; then
+  TODAY=$(date +%Y-%m-%d)
+  # Generate bullet list from commit messages since last tag
+  COMMITS=$(git log --oneline --no-merges "$PREV_TAG..HEAD" --pretty=format:'- %s' 2>/dev/null || true)
+  if [ -n "$COMMITS" ]; then
+    # Check if CHANGELOG.md exists and has an [Unreleased] section
+    if [ -f CHANGELOG.md ]; then
+      # Replace [Unreleased] with new version, add new [Unreleased] above it
+      COMMITS_FILE=$(mktemp)
+      echo "$COMMITS" > "$COMMITS_FILE"
+      TEMP=$(mktemp)
+      awk -v ver="$NEW_VERSION" -v date="$TODAY" -v cf="$COMMITS_FILE" '
+        BEGIN { while ((getline line < cf) > 0) { c = c line "\n" } close(cf) }
+        /^## \[Unreleased\]/ {
+          print "## [Unreleased]"
+          print ""
+          print "## [" ver "] - " date
+          print ""
+          printf "%s", c
+          next
+        }
+        { print }
+      ' CHANGELOG.md > "$TEMP"
+      rm -f "$COMMITS_FILE"
+      mv "$TEMP" CHANGELOG.md
+    fi
+    ok "CHANGELOG.md updated with v$NEW_VERSION entries"
+  fi
+else
+  warn "Previous tag $PREV_TAG not found — skipping CHANGELOG update"
+fi
+
 # ─── Commit and tag ─────────────────────────────────────────────────
 
 if [ "$DRY_RUN" = true ]; then
   TAG="v$NEW_VERSION"
   # Revert version bump files so working tree stays clean
-  git checkout -- package.json public/manifest.json
+  git checkout -- package.json public/manifest.json CHANGELOG.md
   echo ""
   ok "Dry run complete. Would have:"
   echo "  • Committed version bump: $CURRENT_VERSION → $NEW_VERSION"
@@ -180,7 +215,7 @@ if [ "$DRY_RUN" = true ]; then
 fi
 
 info "Committing version bump..."
-git add package.json public/manifest.json
+git add package.json public/manifest.json CHANGELOG.md
 git commit -m "Reset version to $NEW_VERSION for release"
 
 TAG="v$NEW_VERSION"
