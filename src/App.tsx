@@ -16,6 +16,7 @@ import {
 import LoginTab from './components/LoginTab';
 import RefreshTab from './components/RefreshTab';
 import LogsTab from './components/LogsTab';
+import SettingsTab, { type ExtensionSettings, DEFAULT_SETTINGS } from './components/SettingsTab';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -34,6 +35,7 @@ import Help from '@mui/icons-material/Help';
 import DarkMode from '@mui/icons-material/DarkMode';
 import LightMode from '@mui/icons-material/LightMode';
 import SettingsBrightness from '@mui/icons-material/SettingsBrightness';
+import Settings from '@mui/icons-material/Settings';
 
 /** Try to read from the active stored file handle. Returns data or null. */
 async function readStoredHandle(): Promise<LoginData[] | null> {
@@ -49,6 +51,7 @@ async function readStoredHandle(): Promise<LoginData[] | null> {
 export default function App() {
   const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)');
   const [darkMode, setDarkMode] = useState<'system' | 'dark' | 'light'>('system');
+  const [settings, setSettings] = useState<ExtensionSettings>(DEFAULT_SETTINGS);
   const [tabIndex, setTabIndex] = useState(0);
 
   const isDark = darkMode === 'system' ? systemPrefersDark : darkMode === 'dark';
@@ -144,6 +147,8 @@ export default function App() {
         if (result.loginProgress) setLoginProgress(result.loginProgress);
         if (result.refreshProgress) setRefreshProgress(result.refreshProgress);
         if (result.darkMode) setDarkMode(result.darkMode);
+        if (result.extensionSettings) setSettings({ ...DEFAULT_SETTINGS, ...result.extensionSettings });
+        if (result.extensionSettings?.defaultTab != null) setTabIndex(result.extensionSettings.defaultTab);
       }
     );
 
@@ -384,6 +389,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
           <Tab label="Login" icon={<Upload />} />
           <Tab label="Refresh" icon={<Refresh />} />
           <Tab label="Logs" icon={<Help />} />
+          <Tab label="Settings" icon={<Settings />} />
         </Tabs>
 
         {/* Tab content */}
@@ -425,6 +431,13 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
             <LogsTab
               logs={logs}
               onClearLogs={handleClearLogs}
+            />
+          )}
+
+          {tabIndex === 3 && (
+            <SettingsTab
+              settings={settings}
+              onSettingsChange={setSettings}
             />
           )}
         </Box>
