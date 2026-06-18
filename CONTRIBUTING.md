@@ -99,9 +99,14 @@ public/
 ├── manifest.json           # Chrome extension manifest (V3)
 └── *.png                   # Extension icons
 
-.github/workflows/
-├── ci.yml                  # CI pipeline (push/PR to main)
-└── release.yml             # Automated release (triggered by v* tags)
+.github/
+├── workflows/
+│   ├── ci.yml              # CI pipeline (push/PR to main)
+│   └── release.yml         # Automated release (triggered by v* tags)
+└── CODEOWNERS              # Auto-assigns @markvarvel as reviewer
+
+.husky/
+└── pre-commit              # Runs typecheck + tests before every commit
 ```
 
 ## Tech Stack
@@ -128,6 +133,8 @@ public/
    npm run typecheck && npm run test && npm run lint && npm run build
    ```
 4. Commit with a descriptive message
+   - The **pre-commit hook** automatically runs typecheck and tests before each commit
+   - If either fails, the commit is blocked — fix the issues first
 5. Push and open a pull request
 
 ### Code Style
