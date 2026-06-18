@@ -191,6 +191,12 @@ if git rev-parse "$PREV_TAG" >/dev/null 2>&1; then
       rm -f "$COMMITS_FILE"
       mv "$TEMP" CHANGELOG.md
     fi
+    # Update comparison links at bottom of file
+    REPO_URL="https://github.com/markvarvel/IW-Auto-Login"
+    # Update [Unreleased] link to compare against new version
+    sed -i "s|\\[Unreleased\\]: ${REPO_URL}/compare/v[0-9.]*...HEAD|[Unreleased]: ${REPO_URL}/compare/v${NEW_VERSION}...HEAD|g" CHANGELOG.md
+    # Add new version comparison link before [Unreleased] link
+    sed -i "/\\[Unreleased\\]:/i [${NEW_VERSION}]: ${REPO_URL}/compare/v${CURRENT_VERSION}...v${NEW_VERSION}" CHANGELOG.md
     ok "CHANGELOG.md updated with v$NEW_VERSION entries"
   fi
 else
