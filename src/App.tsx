@@ -431,7 +431,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
         </Tabs>
 
         {/* Tab content */}
-        <Box sx={{ flexGrow: 1, overflowY: 'auto', p: 2 }}>
+        <Box key={tabIndex} sx={{ flexGrow: 1, overflowY: 'auto', p: 2, '@keyframes fadeIn': { from: { opacity: 0, transform: 'translateY(4px)' }, to: { opacity: 1, transform: 'translateY(0)' } }, animation: 'fadeIn 0.2s ease-out' }}>
           {tabIndex === 0 && (
             <LoginTab
               loginCredentials={loginCredentials}
