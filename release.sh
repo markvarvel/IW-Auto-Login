@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ─── IW-Auto-Login Release Script ───────────────────────────────────
+# Usage:
+#   ./release.sh              # Auto-increment patch (1.0.52 → 1.0.53)
+#   ./release.sh 1.1.0        # Set explicit version
+#
+# What it does:
+#   1. Run typecheck, tests, and lint
+#   2. Bump version in package.json and manifest.json
+#   3. Commit the version bump
+#   4. Create and push a git tag
+#   5. Monitor the GitHub Actions release workflow
+# ─────────────────────────────────────────────────────────────────────
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+info()  { echo -e "${CYAN}ℹ${NC}  $*"; }
+ok()    { echo -e "${GREEN}✔${NC}  $*"; }
+warn()  { echo -e "${YELLOW}⚠${NC}  $*"; }
+fail()  { echo -e "${RED}✖${NC}  $*"; exit 1; }
+
+# ─── Pre-flight checks ──────────────────────────────────────────────
+
+command -v node >/dev/null 2>&1 || fail "node is not installed"
+command -v git  >/dev/null 2>&1 || fail "git is not installed"
+command -v gh   >/dev/null 2>&1 || fail "gh (GitHub CLI) is not installed"
+
+# Ensure we're in the repo root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Ensure working tree is clean
+if [ -n "$(git status --porcelain)" ]; then
+  fail "Working tree is not clean. Commit or stash your changes first."
+fi
+
+# Ensure we're on main branch
+BRANCH="$(git branch --show-current)"
+if [ "$BRANCH" != "main" ]; then
+  warn "Not on main branch (currently on '$BRANCH')."
+  read -rp "Continue anyway? [y/N] " CONFIRM
+  if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    fail "Aborted."
+  fi
+fi
+
+# ─── Determine version ──────────────────────────────────────────────
+
+CURRENT_VERSION=$(node -p "require('./package.json').version")
+info "Current version: $CURRENT_VERSION"
+
+if [ $# -ge 1 ]; then
+  NEW_VERSION="$1"
+  # Strip leading 'v' if provided
+  NEW_VERSION="${NEW_VERSION#v}"
+  info "Setting version to: $NEW_VERSION"
+  # Update package.json and manifest.json
+  node -e "
+    const fs = require('fs');
+    const files = ['package.json', 'public/manifest.json'];
+    files.forEach(f => {
+      const data = JSON.parse(fs.readFileSync(f, 'utf8'));
+      data.version = '$NEW_VERSION';
+      fs.writeFileSync(f, JSON.stringify(data, null, 2) + '\n');
+    });
+    console.log('Version set to $NEW_VERSION');
+  "
+else
+  info "Auto-incrementing patch version..."
+  node update-version.js
+  NEW_VERSION=$(node -p "require('./package.json').version")
+fi
+
+if [ "$NEW_VERSION" = "$CURRENT_VERSION" ]; then
+  fail "Version didn't change ($NEW_VERSION). Bump failed."
+fi
+
+ok "Version: $CURRENT_VERSION → $NEW_VERSION"
+
+# ─── Run validation ─────────────────────────────────────────────────
+
+info "Running typecheck..."
+npm run typecheck || fail "Typecheck failed"
+
+info "Running tests..."
+npm run test || fail "Tests failed"
+
+info "Running lint..."
+npm run lint || fail "Lint failed"
+
+ok "All checks passed"
+
+# ─── Commit and tag ─────────────────────────────────────────────────
+
+info "Committing version bump..."
+git add package.json public/manifest.json
+git commit -m "Reset version to $NEW_VERSION for release"
+
+TAG="v$NEW_VERSION"
+info "Creating tag: $TAG"
+git tag -a "$TAG" -m "IW-Auto-Login $TAG"
+
+info "Pushing to origin..."
+git push origin "$BRANCH"
+git push origin "$TAG"
+
+ok "Tag $TAG pushed to origin"
+
+# ─── Monitor release workflow ────────────────────────────────────────
+
+info "Waiting for GitHub Actions release workflow..."
+sleep 2  # Give GitHub a moment to register the push
+
+RUN_ID=$(gh run list --workflow=release.yml --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
+
+if [ -z "$RUN_ID" ]; then
+  warn "Could not find release workflow run. Check manually:"
+  echo "  gh run list --workflow=release.yml --limit 3"
+  exit 0
+fi
+
+info "Monitoring workflow run: $RUN_ID"
+echo ""
+
+# Poll until complete (max 5 minutes)
+MAX_WAIT=300
+ELAPSED=0
+INTERVAL=10
+
+while [ $ELAPSED -lt $MAX_WAIT ]; do
+  STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '{status: .status, conclusion: .conclusion}' 2>/dev/null || echo '{"status":"unknown","conclusion":null}')
+
+  CURRENT_STATUS=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
+  CONCLUSION=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).conclusion||'null'))")
+
+  if [ "$CURRENT_STATUS" = "completed" ]; then
+    echo ""
+    if [ "$CONCLUSION" = "success" ]; then
+      ok "Release workflow completed successfully!"
+      echo ""
+      info "Release URL:"
+      echo "  https://github.com/markvarvel/IW-Auto-Login/releases/tag/$TAG"
+      echo ""
+
+      # Show release assets
+      ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null || true)
+      if [ -n "$ASSETS" ]; then
+        info "Release assets:"
+        echo "$ASSETS" | while read -r asset; do
+          echo "  • $asset"
+        done
+      fi
+    else
+      fail "Release workflow failed (conclusion: $CONCLUSION). Check: gh run view $RUN_ID"
+    fi
+    exit 0
+  fi
+
+  printf "\r  ⏳ Workflow status: %-12s (%ds elapsed)" "$CURRENT_STATUS" "$ELAPSED"
+  sleep $INTERVAL
+  ELAPSED=$((ELAPSED + INTERVAL))
+done
+
+echo ""
+warn "Timed out waiting for workflow ($MAX_WAIT seconds)."
+warn "Check manually: gh run view $RUN_ID"
