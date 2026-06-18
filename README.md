@@ -11,7 +11,10 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 - **Login Automation** — Bulk login with multiple accounts from an Excel file, auto-tab grouping by color
 - **Tab Refresh** — Refresh all InstantWar tabs with optional range filtering
-- **Dark Mode** — Follows system theme preference
+- **Dark Mode** — Toggle between system, dark, and light themes (persisted to Chrome storage)
+- **Settings Tab** — Configure default startup tab, confirm-before-start prompt, and clear all data
+- **Confirm Before Start** — Optional MUI confirmation dialog before login or refresh automation
+- **Auto-Reload on Open** — Re-reads your xlsx file every time you open the popup so changes are always fresh
 
 ## Installation
 
