@@ -1,7 +1,7 @@
 {
   "name": "iw-auto-login",
   "private": true,
-  "version": "1.0.41",
+  "version": "1.0.43",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,8 +16,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.2.0",
-    "@mui/material": "^7.2.0",
+    "@mui/icons-material": "^9.1.1",
+    "@mui/material": "^9.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "xlsx": "^0.18.5"

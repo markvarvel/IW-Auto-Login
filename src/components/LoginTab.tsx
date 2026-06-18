@@ -113,7 +113,7 @@ export default function LoginTab({
       {/* Recent Files dropdown */}
       {recentFiles.length > 0 && (
         <Box sx={{ mb: 2 }}>
-          <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mb: 0.5 }}>
+          <Stack direction="row" spacing={0.5} sx={{ mb: 0.5, alignItems: 'center' }}>
             <History sx={{ fontSize: 16, color: 'text.secondary' }} />
             <Typography variant="caption" color="text.secondary">
               Recent Files
