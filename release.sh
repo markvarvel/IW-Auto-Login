@@ -108,6 +108,12 @@ done
 if [ "$DRY_RUN" = true ]; then
   info "DRY RUN — no commits, tags, or pushes will be made"
   echo ""
+  # Revert any file changes on exit (even if validation fails)
+  DRY_RUN_REVERT() {
+    git checkout -- package.json public/manifest.json 2>/dev/null || true
+    [ -f CHANGELOG.md ] && git checkout -- CHANGELOG.md 2>/dev/null || true
+  }
+  trap DRY_RUN_REVERT EXIT
 fi
 if [ "$SKIP_TESTS" = true ]; then
   warn "Skipping tests (--skip-tests)"
@@ -207,8 +213,7 @@ fi
 
 if [ "$DRY_RUN" = true ]; then
   TAG="v$NEW_VERSION"
-  # Revert version bump files so working tree stays clean
-  git checkout -- package.json public/manifest.json CHANGELOG.md
+  # Files already reverted by DRY_RUN_REVERT trap on exit
   echo ""
   ok "Dry run complete. Would have:"
   echo "  • Committed version bump: $CURRENT_VERSION → $NEW_VERSION"
