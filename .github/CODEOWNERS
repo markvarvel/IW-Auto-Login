@@ -1,0 +1,8 @@
+# Default: all files require review from the repo owner
+* @markvarvel
+
+# CI/CD changes require review
+.github/ @markvarvel
+
+# Source code changes require review
+src/ @markvarvel
