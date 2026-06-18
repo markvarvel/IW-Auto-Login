@@ -333,6 +333,9 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
       showSnackbar('No login data found. Please choose your Excel file first.', 'error');
       return;
     }
+    if (settings.confirmBeforeStart && !window.confirm('Start login automation?')) {
+      return;
+    }
     browserAPI.runtime.sendMessage({
       action: 'startAutomatedLogin',
       loginCredentials,
@@ -349,6 +352,9 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
   // ==================== REFRESH HANDLERS ====================
 
   const handleStartRefresh = () => {
+    if (settings.confirmBeforeStart && !window.confirm('Start refresh automation?')) {
+      return;
+    }
     setIsRefreshing(true);
     browserAPI.runtime.sendMessage({
       action: 'startRefresh',
