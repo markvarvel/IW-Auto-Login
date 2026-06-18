@@ -24,7 +24,7 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
  1. DOWNLOAD                      2. EXTRACT                        3. LOAD IN CHROME
  ─────────────                   ──────────────                    ──────────────────
  ┌─────────────────────────┐     ┌───────────────────────┐         chrome://extensions/
- │ 📦 IW-Auto-Login-      │     │ 📁 IW-Auto-Login-     │         ┌──────────────────┐
+ │ 📦 iw-auto-login-      │     │ 📁 iw-auto-login-     │         ┌──────────────────┐
  │    vX.X.X.zip           │ ──► │    vX.X.X/            │ ──►     │  IW-Auto-Login   │
  └─────────────────────────┘     │  ├── manifest.json    │         │  ✅ Enabled      │
                                  │  ├── assets/          │         └──────────────────┘
