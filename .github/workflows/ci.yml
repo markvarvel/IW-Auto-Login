@@ -32,6 +32,15 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Lint changelog
+        run: npm run lint:changelog
+
+      - name: Test release script
+        run: bash test_release.sh
+
+      - name: Test changelog update format
+        run: bash test_changelog_update.sh
+
       - name: Build
         run: npm run build
 
