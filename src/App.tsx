@@ -349,7 +349,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ width: 400, height: 650, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ width: '100%', minWidth: 350, maxWidth: 800, height: 650, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <Box sx={{ p: 2, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
