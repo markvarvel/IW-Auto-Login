@@ -55,10 +55,49 @@ fi
 CURRENT_VERSION=$(node -p "require('./package.json').version")
 info "Current version: $CURRENT_VERSION"
 
+# Validate semver format: X.Y.Z where X,Y,Z are non-negative integers, no leading zeros
+validate_semver() {
+  local ver="$1"
+  if [[ ! "$ver" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    fail "Invalid version format: '$ver' (expected MAJOR.MINOR.PATCH, e.g. 1.2.3)"
+  fi
+  # Reject leading zeros (e.g. 1.02.3)
+  local major minor patch
+  major="${ver%%.*}"
+  minor="${ver#*.}"
+  minor="${minor%%.*}"
+  patch="${ver##*.}"
+  if [[ "$major" != "0" && "$major" =~ ^0[0-9] ]]; then
+    fail "Invalid major version: '$major' (no leading zeros allowed)"
+  fi
+  if [[ "$minor" != "0" && "$minor" =~ ^0[0-9] ]]; then
+    fail "Invalid minor version: '$minor' (no leading zeros allowed)"
+  fi
+  if [[ "$patch" != "0" && "$patch" =~ ^0[0-9] ]]; then
+    fail "Invalid patch version: '$patch' (no leading zeros allowed)"
+  fi
+}
+
+# Compare two semver strings: returns 0 if $1 > $2, 1 otherwise
+version_gt() {
+  local IFS='.'
+  read -ra a <<< "$1"
+  read -ra b <<< "$2"
+  for i in 0 1 2; do
+    if [ "${a[$i]:-0}" -gt "${b[$i]:-0}" ]; then return 0; fi
+    if [ "${a[$i]:-0}" -lt "${b[$i]:-0}" ]; then return 1; fi
+  done
+  return 1
+}
+
 if [ $# -ge 1 ]; then
   NEW_VERSION="$1"
   # Strip leading 'v' if provided
   NEW_VERSION="${NEW_VERSION#v}"
+  validate_semver "$NEW_VERSION"
+  if ! version_gt "$NEW_VERSION" "$CURRENT_VERSION"; then
+    fail "New version ($NEW_VERSION) must be greater than current version ($CURRENT_VERSION)"
+  fi
   info "Setting version to: $NEW_VERSION"
   # Update package.json and manifest.json
   node -e "
