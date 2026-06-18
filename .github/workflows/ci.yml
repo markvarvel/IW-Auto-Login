@@ -35,6 +35,22 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check bundle size
+        run: |
+          MAX_SIZE_KB=250
+          MUI_CHUNK=$(ls dist/assets/vendor-mui-*.js 2>/dev/null | head -1)
+          if [ -z "$MUI_CHUNK" ]; then
+            echo "ERROR: vendor-mui chunk not found!"
+            exit 1
+          fi
+          SIZE_KB=$(du -k "$MUI_CHUNK" | cut -f1)
+          echo "vendor-mui chunk: ${SIZE_KB}kB (limit: ${MAX_SIZE_KB}kB)"
+          if [ "$SIZE_KB" -gt "$MAX_SIZE_KB" ]; then
+            echo "ERROR: vendor-mui chunk (${SIZE_KB}kB) exceeds ${MAX_SIZE_KB}kB limit!"
+            exit 1
+          fi
+          echo "OK: vendor-mui chunk is within budget."
+
       - name: Get version and zip dist folder
         id: version
         run: |n          VERSION=$(node -p "require('./package.json').version")
