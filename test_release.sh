@@ -149,6 +149,19 @@ else
   fail_msg "Combined flags not both detected"
 fi
 
+section "Argument parsing — --no-monitor flag"
+
+save_files
+NEXT=$(next_patch)
+OUT=$(run_release "$NEXT" --dry-run --skip-tests --no-monitor) || true
+restore_files
+
+if echo "$OUT" | grep -qi "no-monitor\|skipping workflow monitoring"; then
+  pass "--no-monitor flag detected in output"
+else
+  fail_msg "--no-monitor flag not detected in output"
+fi
+
 # ─── 2. Semver validation (via dry-run with bad versions) ──────────
 
 section "Semver validation — invalid formats rejected"

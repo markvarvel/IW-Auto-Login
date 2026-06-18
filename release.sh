@@ -7,7 +7,8 @@ set -euo pipefail
 #   ./release.sh 1.1.0        # Set explicit version
 #   ./release.sh --dry-run    # Preview what would happen
 #   ./release.sh --skip-tests # Skip running tests (for quick releases)
-#   ./release.sh 1.1.0 --dry-run --skip-tests
+#   ./release.sh --no-monitor # Skip workflow monitoring (faster completion)
+#   ./release.sh 1.1.0 --dry-run --skip-tests --no-monitor
 #
 # What it does:
 #   1. Run typecheck, tests, and lint
@@ -96,11 +97,13 @@ version_gt() {
 # Parse arguments
 DRY_RUN=false
 SKIP_TESTS=false
+NO_MONITOR=false
 VERSION_ARG=""
 for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=true ;;
     --skip-tests) SKIP_TESTS=true ;;
+    --no-monitor) NO_MONITOR=true ;;
     *) VERSION_ARG="$arg" ;;
   esac
 done
@@ -117,6 +120,9 @@ if [ "$DRY_RUN" = true ]; then
 fi
 if [ "$SKIP_TESTS" = true ]; then
   warn "Skipping tests (--skip-tests)"
+fi
+if [ "$NO_MONITOR" = true ]; then
+  info "Skipping workflow monitoring (--no-monitor)"
 fi
 
 if [ -n "$VERSION_ARG" ]; then
@@ -239,61 +245,69 @@ git push origin "$TAG"
 
 ok "Tag $TAG pushed to origin"
 
-# ─── Monitor release workflow ────────────────────────────────────────
+if [ "$NO_MONITOR" = false ]; then
+  # ─── Monitor release workflow ────────────────────────────────────────
 
-info "Waiting for GitHub Actions release workflow..."
-sleep 2  # Give GitHub a moment to register the push
+  info "Waiting for GitHub Actions release workflow..."
+  sleep 2  # Give GitHub a moment to register the push
 
-RUN_ID=$(gh run list --workflow=release.yml --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
+  RUN_ID=$(gh run list --workflow=release.yml --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || true)
 
-if [ -z "$RUN_ID" ]; then
-  warn "Could not find release workflow run. Check manually:"
-  echo "  gh run list --workflow=release.yml --limit 3"
-  exit 0
-fi
-
-info "Monitoring workflow run: $RUN_ID"
-echo ""
-
-# Poll until complete (max 5 minutes)
-MAX_WAIT=300
-ELAPSED=0
-INTERVAL=10
-
-while [ $ELAPSED -lt $MAX_WAIT ]; do
-  STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '{status: .status, conclusion: .conclusion}' 2>/dev/null || echo '{"status":"unknown","conclusion":null}')
-
-  CURRENT_STATUS=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
-  CONCLUSION=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).conclusion||'null'))")
-
-  if [ "$CURRENT_STATUS" = "completed" ]; then
-    echo ""
-    if [ "$CONCLUSION" = "success" ]; then
-      ok "Release workflow completed successfully!"
-      echo ""
-      info "Release URL:"
-      echo "  https://github.com/markvarvel/IW-Auto-Login/releases/tag/$TAG"
-      echo ""
-
-      # Show release assets
-      ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null || true)
-      if [ -n "$ASSETS" ]; then
-        info "Release assets:"
-        echo "$ASSETS" | while read -r asset; do
-          echo "  • $asset"
-        done
-      fi
-    else
-      fail "Release workflow failed (conclusion: $CONCLUSION). Check: gh run view $RUN_ID"
-    fi
+  if [ -z "$RUN_ID" ]; then
+    warn "Could not find release workflow run. Check manually:"
+    echo "  gh run list --workflow=release.yml --limit 3"
     exit 0
   fi
 
-  printf "\r  ⏳ Workflow status: %-12s (%ds elapsed)" "$CURRENT_STATUS" "$ELAPSED"
-  sleep $INTERVAL
-  ELAPSED=$((ELAPSED + INTERVAL))
-done
+  info "Monitoring workflow run: $RUN_ID"
+  echo ""
 
-echo ""
-warn "Timed out waiting for workflow ($MAX_WAIT seconds)."
-warn "Check manually: gh run view $RUN_ID"
+  # Poll until complete (max 5 minutes)
+  MAX_WAIT=300
+  ELAPSED=0
+  INTERVAL=10
+
+  while [ $ELAPSED -lt $MAX_WAIT ]; do
+    STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '{status: .status, conclusion: .conclusion}' 2>/dev/null || echo '{"status":"unknown","conclusion":null}')
+
+    CURRENT_STATUS=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
+    CONCLUSION=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).conclusion||'null'))")
+
+    if [ "$CURRENT_STATUS" = "completed" ]; then
+      echo ""
+      if [ "$CONCLUSION" = "success" ]; then
+        ok "Release workflow completed successfully!"
+        echo ""
+        info "Release URL:"
+        echo "  https://github.com/markvarvel/IW-Auto-Login/releases/tag/$TAG"
+        echo ""
+
+        # Show release assets
+        ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null || true)
+        if [ -n "$ASSETS" ]; then
+          info "Release assets:"
+          echo "$ASSETS" | while read -r asset; do
+            echo "  • $asset"
+          done
+        fi
+      else
+        fail "Release workflow failed (conclusion: $CONCLUSION). Check: gh run view $RUN_ID"
+      fi
+      exit 0
+    fi
+
+    printf "\r  ⏳ Workflow status: %-12s (%ds elapsed)" "$CURRENT_STATUS" "$ELAPSED"
+    sleep $INTERVAL
+    ELAPSED=$((ELAPSED + INTERVAL))
+  done
+
+  echo ""
+  warn "Timed out waiting for workflow ($MAX_WAIT seconds)."
+  warn "Check manually: gh run view $RUN_ID"
+else
+  ok "Release pushed. Skipped workflow monitoring (--no-monitor)."
+  info "Check the workflow manually:"
+  echo "  gh run list --workflow=release.yml --limit 3"
+  info "Or view the release:"
+  echo "  https://github.com/markvarvel/IW-Auto-Login/releases/tag/$TAG"
+fi
