@@ -25,6 +25,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate tag matches package.json version
+        run: |
+          TAG_VERSION="${{ github.ref_name }}"
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "ERROR: Tag ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
+            echo "Note: npm run build auto-bumps the version, so this must run before build."
+            exit 1
+          fi
+          echo "Tag version matches package.json: $TAG_VERSION"
+
+      - name: Validate README mentions latest version
+        run: |
+          if ! grep -q "iw-auto-login-v" README.md; then
+            echo "ERROR: README.md does not mention versioned zip filename (iw-auto-login-vX.X.X.zip)"
+            exit 1
+          fi
+          if grep -q "iw-auto-login-dist.zip" README.md; then
+            echo "ERROR: README.md still references old zip filename 'iw-auto-login-dist.zip'"
+            exit 1
+          fi
+          echo "README.md versioned zip references are correct."
+
       - name: Typecheck
         run: npm run typecheck
 
@@ -53,28 +76,17 @@ jobs:
           fi
           echo "OK: vendor-mui chunk is within budget."
 
-      - name: Validate tag matches package.json version
+      - name: Fix version in dist (build auto-bumps)
         run: |
-          TAG_VERSION="${{ github.ref_name }}"
-          PKG_VERSION="v$(node -p "require('./package.json').version")"
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "ERROR: Tag ($TAG_VERSION) does not match package.json version ($PKG_VERSION)"
-            exit 1
-          fi
-          echo "Tag version matches package.json: $TAG_VERSION"
-
-      - name: Validate README mentions latest version
-        run: |
-          VERSION="${{ github.ref_name }}"
-          if ! grep -q "iw-auto-login-v" README.md; then
-            echo "ERROR: README.md does not mention versioned zip filename (iw-auto-login-vX.X.X.zip)"
-            exit 1
-          fi
-          if grep -q "iw-auto-login-dist.zip" README.md; then
-            echo "ERROR: README.md still references old zip filename 'iw-auto-login-dist.zip'"
-            exit 1
-          fi
-          echo "README.md versioned zip references are correct."
+          VERSION="${{ github.ref_name#v }}"
+          node -e "
+            const fs = require('fs');
+            const mPath = 'dist/manifest.json';
+            const m = JSON.parse(fs.readFileSync(mPath, 'utf8'));
+            m.version = '$VERSION';
+            fs.writeFileSync(mPath, JSON.stringify(m, null, 2));
+            console.log('Reset dist/manifest.json version to ' + '$VERSION');
+          "
 
       - name: Zip dist folder
         run: |
