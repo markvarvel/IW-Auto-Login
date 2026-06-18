@@ -1,7 +1,7 @@
 {
   "name": "iw-auto-login",
   "private": true,
-  "version": "1.0.43",
+  "version": "1.0.41",
   "type": "module",
   "scripts": {
     "dev": "vite",
