@@ -5,6 +5,8 @@ set -euo pipefail
 # Usage:
 #   ./release.sh              # Auto-increment patch (1.0.52 → 1.0.53)
 #   ./release.sh 1.1.0        # Set explicit version
+#   ./release.sh --dry-run    # Preview what would happen
+#   ./release.sh 1.1.0 --dry-run
 #
 # What it does:
 #   1. Run typecheck, tests, and lint
@@ -90,8 +92,23 @@ version_gt() {
   return 1
 }
 
-if [ $# -ge 1 ]; then
-  NEW_VERSION="$1"
+# Parse arguments
+DRY_RUN=false
+VERSION_ARG=""
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=true ;;
+    *) VERSION_ARG="$arg" ;;
+  esac
+done
+
+if [ "$DRY_RUN" = true ]; then
+  info "DRY RUN — no commits, tags, or pushes will be made"
+  echo ""
+fi
+
+if [ -n "$VERSION_ARG" ]; then
+  NEW_VERSION="$VERSION_ARG"
   # Strip leading 'v' if provided
   NEW_VERSION="${NEW_VERSION#v}"
   validate_semver "$NEW_VERSION"
@@ -136,6 +153,19 @@ npm run lint || fail "Lint failed"
 ok "All checks passed"
 
 # ─── Commit and tag ─────────────────────────────────────────────────
+
+if [ "$DRY_RUN" = true ]; then
+  TAG="v$NEW_VERSION"
+  echo ""
+  ok "Dry run complete. Would have:"
+  echo "  • Committed version bump: $CURRENT_VERSION → $NEW_VERSION"
+  echo "  • Created tag: $TAG"
+  echo "  • Pushed to origin ($BRANCH)"
+  echo "  • Triggered release workflow"
+  echo "  • Published: iw-auto-login-$TAG.zip"
+  echo "  • Release URL: https://github.com/markvarvel/IW-Auto-Login/releases/tag/$TAG"
+  exit 0
+fi
 
 info "Committing version bump..."
 git add package.json public/manifest.json
