@@ -157,6 +157,10 @@ Releases are automated via `release.sh`. The script handles validation, versioni
 
 # Set an explicit version
 ./release.sh 1.1.0
+
+# Preview what would happen without committing or pushing
+./release.sh --dry-run
+./release.sh 1.1.0 --dry-run
 ```
 
 The script performs:
@@ -167,6 +171,8 @@ The script performs:
 5. **Commit & tag** — commits the version bump, creates an annotated `vX.X.X` tag
 6. **Push** — pushes the commit and tag to origin
 7. **Workflow monitoring** — polls GitHub Actions until the release completes (or times out after 5 minutes)
+
+**`--dry-run`**: Runs steps 1–4 (pre-flight checks, semver validation, typecheck/test/lint, version bump preview) but skips commit, tag, push, and workflow monitoring. Reverts version files before exit so the working tree stays clean. Useful for verifying everything is ready before actually releasing.
 
 On success, the script prints the release URL and lists the published assets.
 
