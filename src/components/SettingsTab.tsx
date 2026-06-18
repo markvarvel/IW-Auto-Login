@@ -15,14 +15,12 @@ import { browserAPI } from '../utils';
 
 export interface ExtensionSettings {
   defaultTab: number;
-  autoReloadInterval: number; // minutes, 0 = disabled
   confirmBeforeStart: boolean;
   showNotifications: boolean;
 }
 
 const DEFAULT_SETTINGS: ExtensionSettings = {
   defaultTab: 0,
-  autoReloadInterval: 0,
   confirmBeforeStart: true,
   showNotifications: true,
 };
@@ -81,20 +79,6 @@ export default function SettingsTab({ settings, onSettingsChange }: SettingsTabP
       <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
         Automation
       </Typography>
-      <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-        <InputLabel>Auto-Reload Interval</InputLabel>
-        <Select
-          value={settings.autoReloadInterval}
-          label="Auto-Reload Interval"
-          onChange={(e) => updateSetting('autoReloadInterval', Number(e.target.value))}
-        >
-          <MenuItem value={0}>Disabled</MenuItem>
-          <MenuItem value={5}>Every 5 minutes</MenuItem>
-          <MenuItem value={15}>Every 15 minutes</MenuItem>
-          <MenuItem value={30}>Every 30 minutes</MenuItem>
-          <MenuItem value={60}>Every hour</MenuItem>
-        </Select>
-      </FormControl>
 
       <FormControlLabel
         control={

@@ -137,24 +137,25 @@ export default function App() {
     browserAPI.storage.local.get(
       ['loginCredentials', 'extensionLogs', 'loginProgress', 'refreshProgress', 'lastLoaded', 'darkMode'],
       async (result) => {
-        // 1) Use cached credentials if available
-        if (result.loginCredentials && result.loginCredentials.length > 0) {
+        // 1) Always try to re-read from the stored file handle to get the latest data
+        const freshData = await readStoredHandle();
+        if (freshData && freshData.length > 0) {
+          await applyCredentials(freshData);
+        } else if (result.loginCredentials && result.loginCredentials.length > 0) {
+          // 2) Fall back to cached credentials if file handle is expired
           setLoginCredentials(result.loginCredentials);
           setNeedsSetup(false);
-        } else {
-          // 2) Try to read from stored file handle (user selected their xlsx previously)
-          const data = await readStoredHandle();
-          if (data && data.length > 0) {
-            await applyCredentials(data);
-          }
-          // else: needsSetup stays true → user sees the "Choose File" prompt
         }
+        // else: needsSetup stays true → user sees the "Choose File" prompt
         // Load recent files list
         const files = await loadRecentFiles();
         setRecentFiles(files);
         const active = await loadActiveFile();
         setActiveFileName(active?.name || files[0]?.name || '');
-        if (result.lastLoaded) setLastLoaded(result.lastLoaded);
+        // Only load cached lastLoaded if we didn't re-read fresh data from file
+        if (!freshData || freshData.length === 0) {
+          if (result.lastLoaded) setLastLoaded(result.lastLoaded);
+        }
         if (result.extensionLogs) setLogs(result.extensionLogs);
         if (result.loginProgress) setLoginProgress(result.loginProgress);
         if (result.refreshProgress) setRefreshProgress(result.refreshProgress);
