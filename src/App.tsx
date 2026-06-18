@@ -26,9 +26,13 @@ import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Refresh from '@mui/icons-material/Refresh';
 import Upload from '@mui/icons-material/Upload';
 import Help from '@mui/icons-material/Help';
+import DarkMode from '@mui/icons-material/DarkMode';
+import LightMode from '@mui/icons-material/LightMode';
+import SettingsBrightness from '@mui/icons-material/SettingsBrightness';
 
 /** Try to read from the active stored file handle. Returns data or null. */
 async function readStoredHandle(): Promise<LoginData[] | null> {
@@ -42,8 +46,11 @@ async function readStoredHandle(): Promise<LoginData[] | null> {
 }
 
 export default function App() {
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)');
+  const [darkMode, setDarkMode] = useState<'system' | 'dark' | 'light'>('system');
   const [tabIndex, setTabIndex] = useState(0);
+
+  const isDark = darkMode === 'system' ? systemPrefersDark : darkMode === 'dark';
 
   // Login state
   const [loginCredentials, setLoginCredentials] = useState<LoginData[]>([]);
@@ -112,7 +119,7 @@ export default function App() {
   // ==================== MOUNT: auto-load from cache or stored handle ====================
   useEffect(() => {
     browserAPI.storage.local.get(
-      ['loginCredentials', 'extensionLogs', 'loginProgress', 'refreshProgress', 'lastLoaded'],
+      ['loginCredentials', 'extensionLogs', 'loginProgress', 'refreshProgress', 'lastLoaded', 'darkMode'],
       async (result) => {
         // 1) Use cached credentials if available
         if (result.loginCredentials && result.loginCredentials.length > 0) {
@@ -135,6 +142,7 @@ export default function App() {
         if (result.extensionLogs) setLogs(result.extensionLogs);
         if (result.loginProgress) setLoginProgress(result.loginProgress);
         if (result.refreshProgress) setRefreshProgress(result.refreshProgress);
+        if (result.darkMode) setDarkMode(result.darkMode);
       }
     );
 
@@ -150,16 +158,24 @@ export default function App() {
     return () => browserAPI.storage.onChanged.removeListener(onStorageChange);
   }, []);
 
+  const cycleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = prev === 'system' ? 'dark' : prev === 'dark' ? 'light' : 'system';
+      browserAPI.storage.local.set({ darkMode: next });
+      return next;
+    });
+  };
+
   const theme = useMemo(
     () =>
       createTheme({
         palette: {
-          mode: prefersDarkMode ? 'dark' : 'light',
+          mode: isDark ? 'dark' : 'light',
           primary: { main: '#00e5ff' },
           secondary: { main: '#ff1744' },
         },
       }),
-    [prefersDarkMode]
+    [isDark]
   );
 
   // ==================== FILE HANDLING ====================
@@ -351,10 +367,13 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
       <CssBaseline />
       <Box sx={{ width: '100%', minWidth: 350, maxWidth: 800, height: 650, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <Box sx={{ p: 2, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider' }}>
+        <Box sx={{ p: 2, bgcolor: 'background.paper', borderBottom: 1, borderColor: 'divider', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             InstantWar-Auto-Login
           </Typography>
+          <IconButton onClick={cycleDarkMode} size="small" title={`Theme: ${darkMode} (click to cycle)`}>
+            {darkMode === 'dark' ? <DarkMode /> : darkMode === 'light' ? <LightMode /> : <SettingsBrightness />}
+          </IconButton>
         </Box>
 
         {/* Tabs navigation */}
