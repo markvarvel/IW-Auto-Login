@@ -91,7 +91,8 @@ src/
 ├── components/
 │   ├── LoginTab.tsx         # Login automation tab UI
 │   ├── RefreshTab.tsx       # Tab refresh tab UI
-│   └── LogsTab.tsx          # Activity logs tab UI
+│   ├── LogsTab.tsx          # Activity logs tab UI
+│   └── SettingsTab.tsx      # Extension settings/preferences UI
 └── __mocks__/
     └── chrome.ts            # Chrome API mocks for testing
 
