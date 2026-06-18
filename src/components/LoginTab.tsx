@@ -4,10 +4,6 @@ import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Alert from '@mui/material/Alert';
 import Divider from '@mui/material/Divider';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import RestartAlt from '@mui/icons-material/RestartAlt';
@@ -119,37 +115,54 @@ export default function LoginTab({
               Recent Files
             </Typography>
           </Stack>
-          <FormControl fullWidth size="small">
-            <InputLabel id="recent-files-label">Switch file</InputLabel>
-            <Select
-              labelId="recent-files-label"
-              value={activeFileName}
-              label="Switch file"
-              onChange={(e) => {
-                const selected = recentFiles.find((f) => f.name === e.target.value);
-                if (selected) onSelectRecentFile(selected);
-              }}
-            >
-              {recentFiles.map((file) => (
-                <MenuItem key={file.name} value={file.name} sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Box component="span" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ flex: 1, position: 'relative' }}>
+              <Typography
+                component="label"
+                htmlFor="recent-files-select"
+                variant="caption"
+                sx={{ position: 'absolute', top: -8, left: 12, zIndex: 1, bgcolor: 'background.paper', px: 0.5, color: 'text.secondary' }}
+              >
+                Switch file
+              </Typography>
+              <select
+                id="recent-files-select"
+                value={activeFileName}
+                onChange={(e) => {
+                  const selected = recentFiles.find((f) => f.name === e.target.value);
+                  if (selected) onSelectRecentFile(selected);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '16.5px 14px',
+                  fontSize: 14,
+                  border: '1px solid',
+                  borderColor: 'rgba(255,255,255,0.23)',
+                  borderRadius: 4,
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  color: 'inherit',
+                  appearance: 'auto',
+                }}
+              >
+                {recentFiles.map((file) => (
+                  <option key={file.name} value={file.name}>
                     {file.name}
-                  </Box>
-                  <IconButton
-                    size="small"
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      onRemoveRecentFile(file.name);
-                    }}
-                    sx={{ ml: 1, p: 0 }}
-                  >
-                    <Delete sx={{ fontSize: 14 }} />
-                  </IconButton>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+                  </option>
+                ))}
+              </select>
+            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                const selected = recentFiles.find((f) => f.name === activeFileName);
+                if (selected) onRemoveRecentFile(selected.name);
+              }}
+              sx={{ color: 'text.secondary' }}
+            >
+              <Delete sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Box>
         </Box>
       )}
 
