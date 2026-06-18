@@ -17,15 +17,17 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
-1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the filename will be `iw-auto-login-vX.X.X.zip`
-2. **Extract** the zip file to a permanent folder
-   - **Windows:** `C:\Extensions\IW-Auto-Login\`
-   - **macOS:** `~/Extensions/IW-Auto-Login/`
-   - **Linux:** `~/Extensions/IW-Auto-Login/`
+1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.48.zip`)
+2. **Extract** the zip to a permanent location on your computer
+   - The zip contains a single `dist/` folder — this **is** the complete extension, no other files are needed
+   - **Windows:** Extract to `C:\Extensions\IW-Auto-Login\dist\`
+   - **macOS:** Extract to `~/Extensions/IW-Auto-Login/dist/`
+   - **Linux:** Extract to `~/Extensions/IW-Auto-Login/dist/`
+   - ⚠️ **Do not move or delete the `dist` folder after loading it** — Chrome needs it to stay in the same place
 3. Open `chrome://extensions/` in Chrome (or `brave://extensions/` in Brave Browser)
 4. Enable **Developer mode** (toggle in top right)
 5. Click **Load unpacked**
-6. Select the extracted `dist` folder
+6. Select the `dist` folder you just extracted
 
 ### Option 2: Build from Source
 
@@ -41,7 +43,7 @@ npm install
 npm run build
 ```
 
-Then load the `dist` folder using steps 3–6 above.
+This creates a `dist/` folder in the project directory. Load it in Chrome using steps 3–6 above.
 
 ## Setup — Connecting Your Login File
 
@@ -49,7 +51,7 @@ The extension does **not** bundle your login data. On first run you'll be prompt
 
 ### Quick Start
 
-1. **Open the bundled template** — Find `IW-Logins-Template.xlsx` in the `public/` folder (or in the extension's `dist/` after building). Open it in Excel, LibreOffice, or Google Sheets.
+1. **Open the bundled template** — Find `IW-Logins-Template.xlsx` inside the `dist/` folder (the same folder you loaded into Chrome). Open it in Excel, LibreOffice, or Google Sheets.
 2. **Add your accounts** — Fill in one row per account using the column format below.
 3. **Save as `.xlsx`** — Save the file somewhere persistent
    - **Windows:** `D:\IW\IW-Logins.xlsx` or `C:\Users\you\Google Drive\IW\IW-Logins.xlsx`
