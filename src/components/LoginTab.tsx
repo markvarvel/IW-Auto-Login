@@ -80,7 +80,36 @@ export default function LoginTab({
       {!needsSetup && (
         <>
           <Alert severity="success" sx={{ mb: 2 }}>
-            Login file loaded. Click <strong>Reload</strong> to refresh from your file.
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Box
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: getTimestampColor(lastLoaded),
+                  flexShrink: 0,
+                  ...(isRecentlyLoaded(lastLoaded) && {
+                    '@keyframes pulse': {
+                      '0%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0.5)' },
+                      '70%': { boxShadow: '0 0 0 6px rgba(76, 175, 80, 0)' },
+                      '100%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0)' },
+                    },
+                    animation: 'pulse 2s ease-in-out infinite',
+                  }),
+                }}
+              />
+              <Typography variant="body2">
+                Loaded {loginCredentials.length} accounts
+                {lastLoaded && (
+                  <Typography component="span" variant="caption" sx={{ ml: 0.5, color: 'text.secondary' }}>
+                    — {lastLoaded}
+                  </Typography>
+                )}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+              Click <strong>Reload</strong> to refresh from your file.
+            </Typography>
           </Alert>
 
           <Button
@@ -204,34 +233,7 @@ export default function LoginTab({
 
       <Divider sx={{ mb: 2 }} />
 
-      {/* Status */}
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-        {loginCredentials.length} accounts loaded
-      </Typography>
-      {lastLoaded && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
-          <Box
-            sx={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              bgcolor: getTimestampColor(lastLoaded),
-              flexShrink: 0,
-              ...(isRecentlyLoaded(lastLoaded) && {
-                '@keyframes pulse': {
-                  '0%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0.5)' },
-                  '70%': { boxShadow: '0 0 0 6px rgba(76, 175, 80, 0)' },
-                  '100%': { boxShadow: '0 0 0 0 rgba(76, 175, 80, 0)' },
-                },
-                animation: 'pulse 2s ease-in-out infinite',
-              }),
-            }}
-          />
-          <Typography variant="caption" sx={{ color: getTimestampColor(lastLoaded) }}>
-            Last loaded: {lastLoaded}
-          </Typography>
-        </Box>
-      )}
+
 
       {/* Range filter */}
       <TextField
