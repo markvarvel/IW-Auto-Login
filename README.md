@@ -75,6 +75,16 @@ The extension does **not** bundle your login data. On first run you'll be prompt
 4. **Choose it in the extension** — Open the extension popup → Login tab → click **Choose XLSX File** → select your saved file.
 5. **Done!** — The extension will auto-reload your file every time you open the popup. If the file is moved or deleted, you'll be prompted to choose it again.
 
+### Dark Mode
+
+Click the theme icon in the header (top right) to cycle through three modes:
+
+- **System** — Follows your OS dark/light preference (default)
+- **Dark** — Always dark theme
+- **Light** — Always light theme
+
+Your choice is saved to Chrome storage automatically and persists across sessions.
+
 ### Reloading
 
 Click **Reload File** to re-read your xlsx from disk (picks up any changes you've made). If the file reference has expired (e.g. browser restart), the extension will ask you to choose it again.
