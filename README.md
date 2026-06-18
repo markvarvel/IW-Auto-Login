@@ -17,6 +17,19 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
 
 ### Option 1: Download Pre-Built Extension (Recommended)
 
+```
+ 1. DOWNLOAD                2. EXTRACT                  3. LOAD IN CHROME
+ ─────────────             ──────────────              ──────────────────
+ ┌─────────────────┐       ┌─────────────────┐         chrome://extensions/
+ │ 📦 iw-auto-    │  ───► │ 📁 dist/        │  ───►   ┌──────────────────┐
+ │  login-v1.0.48 │ unzip │  ├── manifest   │  Load   │  IW-Auto-Login   │
+ │     .zip       │       │  ├── assets/    │ unpacked│  ✅ Enabled      │
+ └─────────────────┘       │  └── ...       │         └──────────────────┘
+                           └─────────────────┘
+   From: GitHub             To: Permanent            In: Chrome Extensions
+   Releases page            folder on your PC        (Developer mode ON)
+```
+
 1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.48.zip`)
 2. **Extract** the zip to a permanent location on your computer
    - The zip contains a single `dist/` folder — this **is** the complete extension, no other files are needed
