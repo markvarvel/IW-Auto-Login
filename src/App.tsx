@@ -27,6 +27,7 @@ import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
 import Refresh from '@mui/icons-material/Refresh';
 import Upload from '@mui/icons-material/Upload';
 import Help from '@mui/icons-material/Help';
@@ -371,9 +372,11 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
           <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             InstantWar-Auto-Login
           </Typography>
-          <IconButton onClick={cycleDarkMode} size="small" title={`Theme: ${darkMode} (click to cycle)`}>
-            {darkMode === 'dark' ? <DarkMode /> : darkMode === 'light' ? <LightMode /> : <SettingsBrightness />}
-          </IconButton>
+          <Tooltip title={`Theme: ${darkMode.charAt(0).toUpperCase() + darkMode.slice(1)} (click to cycle)`} arrow>
+            <IconButton onClick={cycleDarkMode} size="small">
+              {darkMode === 'dark' ? <DarkMode /> : darkMode === 'light' ? <LightMode /> : <SettingsBrightness />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* Tabs navigation */}
