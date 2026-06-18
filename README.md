@@ -25,7 +25,7 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
  ─────────────               ──────────────                ──────────────────
  ┌─────────────────────┐     ┌───────────────────────┐     chrome://extensions/
  │ 📦 iw-auto-login-   │     │ 📁 iw-auto-login-     │     ┌──────────────────┐
- │    v1.0.49.zip      │ ──► │    v1.0.49/           │ ──► │  IW-Auto-Login   │
+ │    v1.0.50.zip      │ ──► │    v1.0.50/           │ ──► │  IW-Auto-Login   │
  └─────────────────────┘     │  ├── manifest.json    │     │  ✅ Enabled      │
                              │  ├── assets/          │     └──────────────────┘
    From: GitHub Releases     │  ├── icon*.png        │
@@ -33,11 +33,11 @@ Chrome extension (Manifest V3) for automated login, refresh, and tab management 
                              └───────────────────────┘     folder in Load unpacked
 ```
 
-1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.49.zip`)
+1. **Download** the latest `.zip` from [GitHub Releases](https://github.com/markvarvel/IW-Auto-Login/releases/latest) — the file will be named `iw-auto-login-vX.X.X.zip` (e.g., `iw-auto-login-v1.0.50.zip`)
 2. **Extract** the zip to a permanent location on your computer
-   - The extracted folder will be named `iw-auto-login-vX.X.X` (e.g., `iw-auto-login-v1.0.49`) and contains `manifest.json`, `assets/`, icons, etc. — this **is** the complete extension, no other files are needed
+   - The extracted folder will be named `iw-auto-login-vX.X.X` (e.g., `iw-auto-login-v1.0.50`) and contains `manifest.json`, `assets/`, icons, etc. — this **is** the complete extension, no other files are needed
    - **Windows:** Right-click the zip → **Extract All** → choose a permanent location (e.g., `C:\Extensions\`)
-   - **macOS/Linux:** Unzip the file (e.g., `unzip iw-auto-login-v1.0.49.zip -d ~/Extensions/`)
+   - **macOS/Linux:** Unzip the file (e.g., `unzip iw-auto-login-v1.0.50.zip -d ~/Extensions/`)
    - ⚠️ **Do not move or delete this folder after loading it** — Chrome needs it to stay in the same place
 3. Open `chrome://extensions/` in Chrome (or `brave://extensions/` in Brave Browser)
 4. Enable **Developer mode** (toggle in top right)
@@ -161,7 +161,7 @@ At minimum, you only need to fill in `User Name` and `Password` per account.
 You need to enable **Developer mode** — toggle it on in the top-right corner of `chrome://extensions/`.
 
 ### Extension won't load / shows an error
-- Make sure you selected the **extracted folder** (e.g., `iw-auto-login-v1.0.49/`), **not** the zip file itself
+- Make sure you selected the **extracted folder** (e.g., `iw-auto-login-v1.0.50/`), **not** the zip file itself
 - The folder must contain `manifest.json` at the top level — if you see the zip file inside the folder, you selected the wrong level
 - Try removing the extension and loading it again
 
