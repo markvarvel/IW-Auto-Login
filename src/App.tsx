@@ -36,10 +36,7 @@ import DarkMode from '@mui/icons-material/DarkMode';
 import LightMode from '@mui/icons-material/LightMode';
 import SettingsBrightness from '@mui/icons-material/SettingsBrightness';
 import Settings from '@mui/icons-material/Settings';
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
+
 
 /** Try to read from the active stored file handle. Returns data or null. */
 async function readStoredHandle(): Promise<LoginData[] | null> {
@@ -90,12 +87,7 @@ export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
 
   // Confirmation dialog
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  }>({ open: false, title: '', message: '', onConfirm: () => {} });
+
 
   // Snackbar
   const [snackbar, setSnackbar] = useState<{
@@ -357,16 +349,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
       showSnackbar('No login data found. Please choose your Excel file first.', 'error');
       return;
     }
-    if (settings.confirmBeforeStart) {
-      setConfirmDialog({
-        open: true,
-        title: 'Start Login Automation',
-        message: `This will attempt to log in to ${loginCredentials.length} accounts. Continue?`,
-        onConfirm: doStartLogin,
-      });
-    } else {
-      doStartLogin();
-    }
+    doStartLogin();
   };
 
   const handleStopLogin = () => {
@@ -383,19 +366,6 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
       rangeFilter: refreshRangeFilter,
     });
     showSnackbar('Starting refresh...', 'info');
-  };
-
-  const handleStartRefresh = () => {
-    if (settings.confirmBeforeStart) {
-      setConfirmDialog({
-        open: true,
-        title: 'Start Refresh',
-        message: 'This will refresh all InstantWar tabs. Continue?',
-        onConfirm: doStartRefresh,
-      });
-    } else {
-      doStartRefresh();
-    }
   };
 
   const handleStopRefresh = () => {
@@ -463,7 +433,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
               onRefreshRangeFilterChange={setRefreshRangeFilter}
               isRefreshing={isRefreshing}
               refreshProgress={refreshProgress}
-              onStartRefresh={handleStartRefresh}
+              onStartRefresh={doStartRefresh}
               onStopRefresh={handleStopRefresh}
             />
           )}
@@ -492,36 +462,6 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
         onChange={handleFileInput}
         style={{ display: 'none' }}
       />
-
-      {/* Confirmation dialog */}
-      <Dialog
-        open={confirmDialog.open}
-        onClose={() => setConfirmDialog((d) => ({ ...d, open: false }))}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle sx={{ pb: 1 }}>{confirmDialog.title}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            {confirmDialog.message}
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setConfirmDialog((d) => ({ ...d, open: false }))}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              const action = confirmDialog.onConfirm;
-              setConfirmDialog((d) => ({ ...d, open: false }));
-              action();
-            }}
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <Snackbar
         open={snackbar.open}

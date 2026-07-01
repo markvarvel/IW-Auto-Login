@@ -15,13 +15,11 @@ import { browserAPI } from '../utils';
 
 export interface ExtensionSettings {
   defaultTab: number;
-  confirmBeforeStart: boolean;
   showNotifications: boolean;
 }
 
 const DEFAULT_SETTINGS: ExtensionSettings = {
   defaultTab: 0,
-  confirmBeforeStart: true,
   showNotifications: true,
 };
 
@@ -79,20 +77,6 @@ export default function SettingsTab({ settings, onSettingsChange }: SettingsTabP
       <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
         Automation
       </Typography>
-
-      <FormControlLabel
-        control={
-          <Switch
-            checked={settings.confirmBeforeStart}
-            onChange={(e) => updateSetting('confirmBeforeStart', e.target.checked)}
-            size="small"
-          />
-        }
-        label={
-          <Typography variant="body2">Confirm before starting automation</Typography>
-        }
-        sx={{ mb: 1, ml: 0 }}
-      />
 
       <FormControlLabel
         control={
