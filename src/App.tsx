@@ -86,9 +86,6 @@ export default function App() {
   // Logs
   const [logs, setLogs] = useState<string[]>([]);
 
-  // Confirmation dialog
-
-
   // Snackbar
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
