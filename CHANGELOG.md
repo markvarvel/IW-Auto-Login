@@ -6,6 +6,53 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.0.58] - 2026-06-30
+
+### Changed
+- Fix Logs tab icon (Help → Article) for better semantic match
+- Rename 'Automation' section header to 'Notifications' in Settings
+
+## [1.0.57] - 2026-06-30
+
+### Removed
+- `confirmBeforeStart` confirmation dialog before starting login/refresh automation
+- `confirmBeforeStart` setting from ExtensionSettings interface and Settings UI
+
+### Changed
+- Simplified `handleStartRefresh` — now passes `doStartRefresh` directly to RefreshTab
+
+## [1.0.56] - 2026-06-18
+
+### Changed
+- Parallelize CI: move release script tests to separate `release-tests` job
+- Move `--skip-tests` into `run_release` helper for cleaner test calls
+
+### Fixed
+- Validation test grep patterns to match actual release.sh output format
+
+### Removed
+- Slow typecheck/lint execution tests from test_release.sh (CI steps already cover these)
+
+## [1.0.55] - 2026-06-18
+
+### Added
+- `--skip-typecheck` and `--skip-lint` flags to release.sh
+- `lint:changelog`, `test_release.sh`, and `test_changelog_update.sh` as CI steps
+
+### Removed
+- Dry-run integration test from test_changelog_update.sh (duplicates test_release.sh)
+
+## [1.0.54] - 2026-06-18
+
+### Added
+- `test_release.sh`: comprehensive release script test suite
+- `test_changelog_update.sh`: validate CHANGELOG.md auto-update format
+- `lint-changelog.sh`: validate CHANGELOG.md format consistency
+- `--no-monitor` flag to release.sh: skip workflow monitoring for faster completion
+
+### Fixed
+- Dry-run revert trap in release.sh to keep working tree clean
+
 ## [1.0.53] - 2026-06-18
 
 - Fix changelog links: auto-update comparison URLs on release
@@ -92,8 +139,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - Initial public release
 
+[1.0.58]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.57...v1.0.58
+[1.0.57]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.56...v1.0.57
+[1.0.56]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.55...v1.0.56
+[1.0.55]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.54...v1.0.55
+[1.0.54]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.53...v1.0.54
 [1.0.53]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.52...v1.0.53
-[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.53...HEAD
+[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.58...HEAD
 [1.0.52]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.51...v1.0.52
 [1.0.51]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.50...v1.0.51
 [1.0.50]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.49...v1.0.50
