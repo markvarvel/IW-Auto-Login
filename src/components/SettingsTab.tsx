@@ -73,9 +73,9 @@ export default function SettingsTab({ settings, onSettingsChange }: SettingsTabP
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Automation */}
+      {/* Notifications */}
       <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
-        Automation
+        Notifications
       </Typography>
 
       <FormControlLabel

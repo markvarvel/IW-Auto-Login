@@ -31,7 +31,7 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import Refresh from '@mui/icons-material/Refresh';
 import Upload from '@mui/icons-material/Upload';
-import Help from '@mui/icons-material/Help';
+import Article from '@mui/icons-material/Article';
 import DarkMode from '@mui/icons-material/DarkMode';
 import LightMode from '@mui/icons-material/LightMode';
 import SettingsBrightness from '@mui/icons-material/SettingsBrightness';
@@ -396,7 +396,7 @@ const hasFileSystemAccess = typeof window !== 'undefined' && 'showOpenFilePicker
         <Tabs value={tabIndex} onChange={(_, val) => setTabIndex(val)} variant="fullWidth">
           <Tab label="Login" icon={<Upload />} />
           <Tab label="Refresh" icon={<Refresh />} />
-          <Tab label="Logs" icon={<Help />} />
+          <Tab label="Logs" icon={<Article />} />
           <Tab label="Settings" icon={<Settings />} />
         </Tabs>
 
