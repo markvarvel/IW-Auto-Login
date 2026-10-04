@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,6 +21,12 @@ try {
   // Also update package.json
   packageJson.version = manifest.version;
   
+  // `dist/` only exists after a build. release.sh runs this script directly during
+  // a dry run on a fresh checkout, where there is no dist/ yet — writing to it would
+  // throw and leave public/manifest.json bumped while package.json was not, which
+  // then aborts the release with "Version didn't change".
+  mkdirSync(dirname(distManifestPath), { recursive: true });
+  
   // Update both source and dist manifests so they stay in sync
   writeFileSync(srcManifestPath, JSON.stringify(manifest, null, 2));
   writeFileSync(distManifestPath, JSON.stringify(manifest, null, 2));
@@ -29,4 +35,5 @@ try {
   console.log(`Version bumped to ${manifest.version}`);
 } catch (error) {
   console.error('Error updating version:', error);
+  process.exitCode = 1;
 }

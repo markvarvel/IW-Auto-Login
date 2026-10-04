@@ -163,7 +163,7 @@ if [ -n "$VERSION_ARG" ]; then
   "
 else
   info "Auto-incrementing patch version..."
-  node update-version.js
+  node update-version.js || fail "update-version.js failed"
   NEW_VERSION=$(node -p "require('./package.json').version")
 fi
 
