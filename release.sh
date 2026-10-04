@@ -41,8 +41,12 @@ command -v gh   >/dev/null 2>&1 || fail "gh (GitHub CLI) is not installed"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Ensure working tree is clean
-if [ -n "$(git status --porcelain)" ]; then
+# Ensure working tree is clean.
+# Use content-based checks rather than `git status --porcelain`, which also reports
+# files as modified when only the stat cache or line endings differ (common on
+# Windows with core.autocrlf=true and no .gitattributes). A byte-level rewrite
+# that normalizes to the same content must not block a release.
+if ! git diff --quiet HEAD -- || ! git diff --cached --quiet HEAD -- || [ -n "$(git ls-files --others --exclude-standard)" ]; then
   fail "Working tree is not clean. Commit or stash your changes first."
 fi
 
@@ -288,10 +292,14 @@ if [ "$NO_MONITOR" = false ]; then
   INTERVAL=10
 
   while [ $ELAPSED -lt $MAX_WAIT ]; do
-    STATUS=$(gh run view "$RUN_ID" --json status,conclusion --jq '{status: .status, conclusion: .conclusion}' 2>/dev/null || echo '{"status":"unknown","conclusion":null}')
-
-    CURRENT_STATUS=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).status))")
-    CONCLUSION=$(echo "$STATUS" | node -p "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).conclusion||'null'))")
+    # Ask gh for a single space-delimited line and split it in pure bash.
+    # Previously this piped JSON through `node -p` with a statement list; the last
+    # expression was process.stdin.on(...), which returns the stdin stream, so
+    # node printed the raw Socket object instead of the status. CURRENT_STATUS was
+    # therefore never "completed" and the loop always ran to the timeout.
+    RESULT=$(gh run view "$RUN_ID" --json status,conclusion --jq '.status + " " + (.conclusion // "null")' 2>/dev/null || echo "unknown null")
+    CURRENT_STATUS="${RESULT%% *}"
+    CONCLUSION="${RESULT##* }"
 
     if [ "$CURRENT_STATUS" = "completed" ]; then
       echo ""

@@ -73,6 +73,9 @@ restore_files() {
   if [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
     cp "$BACKUP_DIR/package.json" package.json
     cp "$BACKUP_DIR/manifest.json" public/manifest.json
+    # cp leaves git's stat cache dirty, so the next release.sh pre-flight sees a
+    # phantom "modified" even though the content is identical. Refresh the index.
+    git update-index --refresh >/dev/null 2>&1 || true
     rm -rf "$BACKUP_DIR"
     BACKUP_DIR=""
   fi
