@@ -63,16 +63,16 @@ async function fireTabUpdated(
 /**
  * Complete a single tab refresh cycle: advance so refreshAllTabs reaches
  * waitForTabLoad, fire onUpdated to resolve it, flush microtasks, then
- * advance past the 27s inter-tab delay.
+ * advance past the 30s inter-tab delay.
  */
 async function completeTabRefresh(tabId: number) {
   // Let refreshAllTabs progress through its async operations to waitForTabLoad
   await vi.advanceTimersByTimeAsync(50);
   await fireTabUpdated(tabId, { status: 'complete' });
-  // Flush microtasks so refreshAllTabs creates the 27s setTimeout
+  // Flush microtasks so refreshAllTabs creates the 30s setTimeout
   await vi.advanceTimersByTimeAsync(0);
-  // Now advance past the 27s delay
-  await vi.advanceTimersByTimeAsync(28000);
+  // Now advance past the 30s delay
+  await vi.advanceTimersByTimeAsync(31000);
 }
 
 // ---------- tests ----------
@@ -279,8 +279,8 @@ describe('background.ts — login flow', () => {
       // Trigger onUpdated with status 'complete' to resolve waitForTabLoad
       await fireTabUpdated(500, { status: 'complete' });
 
-      // Advance past the 22s delay in loginFormSubmitted
-      await vi.advanceTimersByTimeAsync(23000);
+      // Advance past the 25s delay in loginFormSubmitted
+      await vi.advanceTimersByTimeAsync(26000);
 
       // Wait for the full handler to complete
       await formSubmittedPromise;
@@ -401,7 +401,7 @@ describe('background.ts — login flow', () => {
 
       await mocks.onUpdated.waitForListener();
       await fireTabUpdated(800, { status: 'complete' });
-      await vi.advanceTimersByTimeAsync(23000);
+      await vi.advanceTimersByTimeAsync(26000);
       await formSubmittedPromise;
 
       // Should add to existing group, not create a new one
@@ -432,7 +432,7 @@ describe('background.ts — login flow', () => {
 
       await mocks.onUpdated.waitForListener();
       await fireTabUpdated(900, { status: 'complete' });
-      await vi.advanceTimersByTimeAsync(23000);
+      await vi.advanceTimersByTimeAsync(26000);
       await formSubmittedPromise;
 
       // Should create a new group
@@ -463,7 +463,7 @@ describe('background.ts — login flow', () => {
 
       await mocks.onUpdated.waitForListener();
       await fireTabUpdated(950, { status: 'complete' });
-      await vi.advanceTimersByTimeAsync(23000);
+      await vi.advanceTimersByTimeAsync(26000);
       await formSubmittedPromise;
 
       expect(mocks.tabGroupsUpdate).toHaveBeenCalledWith(100, {
@@ -492,7 +492,7 @@ describe('background.ts — login flow', () => {
 
       await mocks.onUpdated.waitForListener();
       await fireTabUpdated(960, { status: 'complete' });
-      await vi.advanceTimersByTimeAsync(23000);
+      await vi.advanceTimersByTimeAsync(26000);
       await formSubmittedPromise;
 
       // groupTabByLogin catches errors internally, so the log says "groupTabByLogin FAILED"
@@ -593,8 +593,8 @@ describe('background.ts — login flow', () => {
       const timeoutLog = allData.find((s: string) => s.includes('Timeout refreshing tab 40'));
       expect(timeoutLog).toBeDefined();
 
-      // Advance past the 27s inter-tab delay
-      await vi.advanceTimersByTimeAsync(28000);
+      // Advance past the 30s inter-tab delay
+      await vi.advanceTimersByTimeAsync(31000);
 
       // Second tab should still be processed
       await completeTabRefresh(41);
@@ -647,7 +647,7 @@ describe('background.ts — login flow', () => {
       // Complete the first tab's refresh
       await fireTabUpdated(60, { status: 'complete' });
       await vi.advanceTimersByTimeAsync(0);  // flush microtask
-      await vi.advanceTimersByTimeAsync(28000);  // advance past 27s
+      await vi.advanceTimersByTimeAsync(31000);  // advance past 30s
       await refreshPromise;
 
       // First tab should be refreshed, but not the others
@@ -711,7 +711,7 @@ describe('background.ts — login flow', () => {
 
       await mocks.onUpdated.waitForListener();
       await fireTabUpdated(1100, { status: 'complete' });
-      await vi.advanceTimersByTimeAsync(23000);
+      await vi.advanceTimersByTimeAsync(26000);
       await formPromise1;
 
       // After loginFormSubmitted completes, processLoginQueue should fire again

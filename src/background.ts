@@ -198,8 +198,8 @@ async function refreshAllTabs(rangeFilter?: string) {
       } catch {
         logToStorage(`Timeout refreshing tab ${tab.id}, continuing...`, 'warn');
       }
-      // Wait 25s + 2s extra = 27s
-      await new Promise(resolve => setTimeout(resolve, 27000));
+      // Wait 25s + 5s extra = 30s
+      await new Promise(resolve => setTimeout(resolve, 30000));
     }
   }
   await updateRefreshProgress(0, 0, false);
@@ -260,8 +260,8 @@ chrome.runtime.onMessage.addListener(async (message, _sender) => {
         logToStorage(`Grouping failed for ${loginName}: ${error}`, 'error');
       }
 
-      // 22s delay + 3s queue delay = 25s total between logins
-      await new Promise(resolve => setTimeout(resolve, 22000));
+      // 25s delay + 3s queue delay = 28s total between logins
+      await new Promise(resolve => setTimeout(resolve, 25000));
     } else {
       logToStorage(`No tracked tab ID for login ${loginName}`, 'warn');
     }
