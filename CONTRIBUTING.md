@@ -38,6 +38,8 @@ npm run build
 
 Creates a production build in the `dist/` folder. Also auto-increments the version number in `package.json` and `manifest.json`.
 
+> **Note:** `npm run build` has the side effect of bumping the version in `package.json` and `public/manifest.json`. To verify a change compiles without dirtying your working tree, use `npx vite build` instead.
+
 ### Typecheck
 
 ```bash
@@ -64,6 +66,18 @@ npm run test:coverage # Run with coverage report
 
 Tests use Vitest and jsdom. Mock Chrome APIs are in `__mocks__/chrome.ts`.
 
+Run a single test file or test:
+
+```bash
+npx vitest run src/utils.test.ts    # one file
+npx vitest run -t "getBrowserAPI"   # one test by name
+```
+
+Two things to know when adding tests:
+
+- Vitest only collects `src/**/*.test.ts`. A `.test.tsx` file will **not** run and `npm run test` will still pass — name component tests `.test.ts`.
+- `vitest.config.ts` sets `setupFiles: []`, so Chrome APIs are not mocked globally. Each test file must `import { setupChromeMock } from './__mocks__/chrome'` and call it in `beforeEach`. Because `background.ts` and `content.ts` register listeners and run init at module scope, their tests use `vi.resetModules()` plus a dynamic `await import(...)` per test group — see `src/background.test.ts` for the pattern.
+
 ### CHANGELOG lint
 
 ```bash
@@ -74,16 +88,26 @@ Validates that `CHANGELOG.md` follows the [Keep a Changelog](https://keepachange
 
 ## CI Pipeline
 
-Every push to `main` and every pull request runs the full CI pipeline:
+Every push to `main` and every pull request runs two jobs.
+
+**Job 1 — `build-and-lint`:**
 
 1. **Typecheck** — `npm run typecheck`
 2. **Test** — `npm run test`
 3. **Lint** — `npm run lint`
 4. **Build** — `npm run build`
-5. **Bundle size check** — Fails if `vendor-mui` chunk exceeds 280kB
+5. **Bundle size check** — Fails if the `vendor-mui` chunk exceeds **280kB**
 6. **Zip** — Creates a versioned zip artifact (`iw-auto-login-vX.X.X.zip`)
 
-All steps must pass before merging.
+**Job 2 — `release-tests`:**
+
+1. **CHANGELOG lint** — `npm run lint:changelog`
+2. **Test release script** — `bash test_release.sh`
+3. **Test changelog update** — `bash test_changelog_update.sh`
+
+All steps must pass before merging. If you modify `release.sh`, `lint-changelog.sh`, or `CHANGELOG.md`, run the Job 2 commands locally — Job 1 will pass while Job 2 fails.
+
+Both `ci.yml` and `release.yml` enforce a **280kB** limit on the `vendor-mui` chunk. It currently sits at roughly 260kB, so there is limited headroom — adding new MUI components will require trimming existing ones.
 
 ## Project Structure
 
@@ -149,8 +173,12 @@ public/
 ### Code Style
 
 - Use **deep MUI imports** (e.g., `import Button from '@mui/material/Button'`) — not barrel imports
-- Keep the `vendor-mui` chunk under 280kB
-- All TypeScript strict checks are enabled (`noUnusedLocals`, `noUnusedParameters`, `noUncheckedIndexedAccess`)
+- Keep the `vendor-mui` chunk under 280kB (enforced by both `ci.yml` and `release.yml`)
+- All TypeScript strict checks are enabled (`strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`). Note that `noUncheckedIndexedAccess` is **not** enabled, so indexed access is not type-checked.
+- `npm run lint` uses no `--max-warnings`, and `no-explicit-any`, `no-unused-vars`, and `react-refresh/only-export-components` are configured as warnings. Lint will exit 0 even when they fire — watch the output.
+- `*.xlsx` files are gitignored except `public/IW-Logins-Template.xlsx`. Login spreadsheets contain real credentials; never commit one.
+- The MV3 service worker output `assets/background-v1.js` is an unhashed filename hardcoded in both `vite.config.ts` and `public/manifest.json`. Renaming the `background` rollup entry breaks the extension silently at load time.
+- `npm run lint:changelog` and the release scripts require Bash (Git Bash or WSL on Windows)
 - Follow existing patterns for component structure and naming
 
 ## Release Process
@@ -206,6 +234,8 @@ The script performs:
 
 On success, the script prints the release URL and lists the published assets.
 
+> **Note:** `release.sh` bumps the version itself, so do not run `npm run build` beforehand — that would bump twice. `release.yml` validates that the tag matches `package.json` *before* its own build runs, then patches `dist/manifest.json` back to the tag version afterwards.
+
 ### Manual release (alternative)
 
 If you prefer to release manually:
@@ -247,9 +277,9 @@ The **release workflow** (`release.yml`) automatically:
 
 | Chunk | Max Size | Notes |
 |-------|----------|-------|
-| `vendor-mui` | 280kB | MUI components + Emotion styling engine |
+| `vendor-mui` | 280kB | MUI components + Emotion styling engine. Currently ~260kB, so headroom is tight. |
 | `main` | — | Application code (~15kB) |
 | `vendor-react` | — | React + ReactDOM (~195kB) |
 | `vendor-xlsx` | — | SheetJS library (~333kB) |
 
-The `vendor-mui` limit is enforced in CI. If you add a new MUI component, check the chunk size with `npm run build` and verify it stays within budget.
+The `vendor-mui` limit is enforced in CI. If you add a new MUI component, check the chunk size with `npx vite build` (not `npm run build`, which bumps the version) and verify it stays within budget.
