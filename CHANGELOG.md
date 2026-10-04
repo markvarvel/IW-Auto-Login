@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [1.0.60] - 2026-10-04
+
+- Raise CI MUI bundle limit to 280kB and correct contributor docs
+- Add 3s to refresh inter-tab delay and post-login delay
+
 ## [1.0.58] - 2026-06-30
 
 ### Changed
@@ -145,7 +150,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.55]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.54...v1.0.55
 [1.0.54]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.53...v1.0.54
 [1.0.53]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.52...v1.0.53
-[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.58...HEAD
+[1.0.60]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.59...v1.0.60
+[Unreleased]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.60...HEAD
 [1.0.52]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.51...v1.0.52
 [1.0.51]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.50...v1.0.51
 [1.0.50]: https://github.com/markvarvel/IW-Auto-Login/compare/v1.0.49...v1.0.50

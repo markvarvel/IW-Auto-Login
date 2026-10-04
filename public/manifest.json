@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "InstantWar-Auto-Login",
-  "version": "1.0.59",
+  "version": "1.0.60",
   "description": "Automated login, refresh, and tab management for InstantWar.",
   "permissions": [
     "tabs",
